@@ -162,7 +162,6 @@ Olist_ecommerce_project/
 │   └── 08_seller_segments.png            # 卖家分层
 ├── 
 ├── 📝 分析报告 (reports/)
-│   ├── Executive_Summary.md              # 高管总结报告
 │   └── EDA_Summary_Report.md             # EDA分析总结
 ├── 
 ├── 📚 项目文档 (docs/)
@@ -197,6 +196,5 @@ Olist_ecommerce_project/
 ---
 
 **项目完成度**: 🎉 **100%**  
-**文档更新时间**: 2024年7月  
-**项目负责人**: Business Analyst  
+**文档更新时间**: 2025年7月  
 **数据来源**: Olist Brazilian E-commerce Dataset 
