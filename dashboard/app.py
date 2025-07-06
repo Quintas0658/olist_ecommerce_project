@@ -1056,7 +1056,7 @@ def show_monthly_analysis(data_pipeline):
                         # 分析层级变化
                         flow_result = analyzer.analyze_tier_changes(analysis_months)
                         
-                        if not flow_result.empty and isinstance(flow_result, dict):
+                        if isinstance(flow_result, dict) and flow_result:
                             display_flow_results(flow_result, analysis_months)
                         else:
                             st.warning("⚠️ 暂无层级流转数据")
