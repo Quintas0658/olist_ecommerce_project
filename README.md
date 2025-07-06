@@ -1,5 +1,7 @@
 # 🚀 Olist E-commerce Analysis Platform
 
+🌐 **Language / 语言**: [🇨🇳 中文](README.md) | [🇺🇸 English](README_EN.md)
+
 ## 📊 项目概述
 
 一个**企业级电商数据分析平台**，基于巴西最大的电商平台Olist的真实数据，提供全方位的卖家生命周期管理和商业智能分析。
