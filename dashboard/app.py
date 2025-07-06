@@ -24,7 +24,9 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-# 导入月度分析模块
+# 导入数据管道和月度分析模块
+from src.data_pipeline import DataPipeline
+
 MonthlySellerAnalyzer = None
 try:
     from src.monthly_analysis import MonthlySellerAnalyzer
@@ -927,11 +929,11 @@ def display_business_insights(data):
         
         st.markdown('</div>', unsafe_allow_html=True)
 
-def show_monthly_analysis():
+def show_monthly_analysis(data_pipeline):
     """显示月度分析"""
     
     # 检查模块可用性
-    if not monthly_analyzer_available:
+    if not MONTHLY_ANALYSIS_AVAILABLE:
         if st.session_state.language == 'zh':
             st.error("❌ 月度分析模块不可用")
             st.info("📝 请确保 src/monthly_analysis.py 文件存在且正确配置")
@@ -1305,6 +1307,9 @@ def main():
     # 页面标题
     st.markdown(f'<h1 class="main-header">{get_text("page_title")}</h1>', unsafe_allow_html=True)
     
+    # 创建数据管道实例 (用于月度分析)
+    data_pipeline = DataPipeline()
+    
     # 加载数据
     with st.spinner(get_text('loading')):
         seller_profile, seller_analysis, orders, order_items, reviews, products = load_data()
@@ -1448,7 +1453,7 @@ def main():
             )
     
     with tab6:
-        show_monthly_analysis()
+        show_monthly_analysis(data_pipeline)
 
     # 页脚
     st.markdown("---")
