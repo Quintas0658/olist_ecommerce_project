@@ -991,7 +991,10 @@ def show_monthly_analysis(data_pipeline):
             with col2:
                 st.markdown("")
                 if st.button("📖", help="查看详细的数据回望逻辑说明文档"):
-                    st.info("📄 详细文档：docs/Monthly_Analysis_Lookback_Logic.md")
+                    if st.session_state.get('language', 'zh') == 'en':
+                        st.info("📄 Detailed Documentation: docs/Monthly_Analysis_Lookback_Logic_EN.md")
+                    else:
+                        st.info("📄 详细文档：docs/Monthly_Analysis_Lookback_Logic.md")
             
             if st.button("🔍 开始同比环比分析", type="primary"):
                 with st.spinner("🔄 正在进行同比环比分析..."):
@@ -1066,7 +1069,10 @@ def show_monthly_analysis(data_pipeline):
             with col2:
                 st.markdown("")
                 if st.button("📖 详情", help="查看详细的数据回望逻辑说明文档", key="lookback_help_flow"):
-                    st.info("📄 详细文档：docs/Monthly_Analysis_Lookback_Logic.md")
+                    if st.session_state.get('language', 'zh') == 'en':
+                        st.info("📄 Detailed Documentation: docs/Monthly_Analysis_Lookback_Logic_EN.md")
+                    else:
+                        st.info("📄 详细文档：docs/Monthly_Analysis_Lookback_Logic.md")
             
             # 生成月份列表
             start_idx = available_months.index(start_month)
