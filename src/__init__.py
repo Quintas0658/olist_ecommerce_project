@@ -9,11 +9,11 @@ __author__ = "Data Science Team"
 from .data_pipeline import DataPipeline
 from .analysis import BusinessAnalyzer
 from .visualization import ChartGenerator
-from .segmentation import SellerSegmentation
+from .monthly_analysis import MonthlySellerAnalyzer
 
 __all__ = [
     'DataPipeline',
     'BusinessAnalyzer', 
     'ChartGenerator',
-    'SellerSegmentation'
+    'MonthlySellerAnalyzer'
 ] 
