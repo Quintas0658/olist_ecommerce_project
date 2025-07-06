@@ -15,8 +15,16 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 import os
+import sys
 import warnings
 warnings.filterwarnings('ignore')
+
+# 添加项目路径
+sys.path.append('..')
+try:
+    from src.monthly_analysis import MonthlySellerAnalyzer
+except ImportError:
+    st.warning("月度分析模块导入失败，部分功能将不可用")
 
 # ======================== 语言管理系统 ========================
 
@@ -57,6 +65,7 @@ TEXTS = {
         'tab_geo': '🗺️ 地理分析',
         'tab_performance': '📈 性能分析',
         'tab_insights': '🧠 智能洞察',
+        'tab_monthly': '📅 月度分析',
         
         # 图表标题
         'platform_overview': '📊 平台总览分析',
@@ -125,6 +134,27 @@ TEXTS = {
         'overall_average': '全体平均',
         'radar_title_single': '🎯 {}层级 vs 全体平均性能对比',
         'radar_title_multi': '🎯 各层级卖家性能雷达图',
+        
+        # 月度分析相关
+        'monthly_analysis': '📅 月度卖家动态分析',
+        'month_selection': '📆 选择分析月份',
+        'lookback_months': '⏳ 回望月数',
+        'tier_flow_matrix': '🔄 层级流转矩阵',
+        'tier_stability': '⚖️ 层级稳定性',
+        'monthly_trends': '📈 月度趋势',
+        'upgrade_sellers': '⬆️ 升级卖家',
+        'downgrade_sellers': '⬇️ 降级卖家',
+        'stable_sellers': '🔒 稳定卖家',
+        'volatile_sellers': '🌊 波动卖家',
+        'data_timespan': '数据时间跨度',
+        'analyzing_months': '正在分析月份',
+        'monthly_kpi': '📊 月度关键指标',
+        'active_sellers_month': '活跃卖家数',
+        'monthly_gmv': '月度GMV',
+        'avg_rating_month': '平均评分',
+        'tier_changes': '层级变化情况',
+        'stability_rate': '稳定率',
+        'no_monthly_data': '⚠️ 暂无月度数据，请检查数据源',
     },
     'en': {
         # 页面标题和基本文本
@@ -157,6 +187,7 @@ TEXTS = {
         'tab_geo': '🗺️ Geographic',
         'tab_performance': '📈 Performance',
         'tab_insights': '🧠 Smart Insights',
+        'tab_monthly': '📅 Monthly Analysis',
         
         # 图表标题
         'platform_overview': '📊 Platform Overview Analysis',
@@ -225,6 +256,27 @@ TEXTS = {
         'overall_average': 'Overall Average',
         'radar_title_single': '🎯 {} Tier vs Overall Average Performance',
         'radar_title_multi': '🎯 Seller Performance Radar by Tier',
+        
+        # 月度分析相关
+        'monthly_analysis': '📅 Monthly Seller Dynamic Analysis',
+        'month_selection': '📆 Select Analysis Month',
+        'lookback_months': '⏳ Lookback Months',
+        'tier_flow_matrix': '🔄 Tier Flow Matrix',
+        'tier_stability': '⚖️ Tier Stability',
+        'monthly_trends': '📈 Monthly Trends',
+        'upgrade_sellers': '⬆️ Upgrading Sellers',
+        'downgrade_sellers': '⬇️ Downgrading Sellers',
+        'stable_sellers': '🔒 Stable Sellers',
+        'volatile_sellers': '🌊 Volatile Sellers',
+        'data_timespan': 'Data Timespan',
+        'analyzing_months': 'Analyzing Months',
+        'monthly_kpi': '📊 Monthly Key Indicators',
+        'active_sellers_month': 'Active Sellers',
+        'monthly_gmv': 'Monthly GMV',
+        'avg_rating_month': 'Average Rating',
+        'tier_changes': 'Tier Changes',
+        'stability_rate': 'Stability Rate',
+        'no_monthly_data': '⚠️ No monthly data available, please check data source',
     }
 }
 
@@ -868,6 +920,190 @@ def display_business_insights(data):
         
         st.markdown('</div>', unsafe_allow_html=True)
 
+def create_monthly_analysis_tab():
+    """创建月度分析标签页"""
+    st.markdown(f"## {get_text('monthly_analysis')}")
+    
+    try:
+        # 初始化月度分析器
+        analyzer = MonthlySellerAnalyzer()
+        
+        # 获取可用月份
+        available_months = analyzer.get_available_months()
+        
+        if not available_months:
+            st.error(get_text('no_monthly_data'))
+            return
+        
+        # 显示数据基本信息
+        col1, col2 = st.columns(2)
+        with col1:
+            st.info(f"📅 {get_text('data_timespan')}: {available_months[0]} ~ {available_months[-1]}")
+        with col2:
+            st.info(f"📊 总月数: {len(available_months)} 个月")
+        
+        # 月份选择器
+        st.markdown(f"### {get_text('month_selection')}")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            # 选择目标月份（默认最后一个月）
+            selected_month = st.selectbox(
+                "目标月份",
+                available_months,
+                index=len(available_months)-1
+            )
+        
+        with col2:
+            # 回望月数
+            lookback = st.slider(get_text('lookback_months'), 1, 6, 3)
+        
+        # 分析按钮
+        if st.button("🔍 开始分析", type="primary"):
+            with st.spinner("正在分析月度数据..."):
+                # 构建月度画像
+                monthly_profile = analyzer.build_monthly_seller_profile(selected_month, lookback)
+                
+                if monthly_profile.empty:
+                    st.warning(f"⚠️ {selected_month} 月份无数据")
+                    return
+                
+                # 获取月度摘要
+                summary = analyzer.get_monthly_summary(selected_month)
+                
+                # 显示月度KPI
+                st.markdown(f"### {get_text('monthly_kpi')} - {selected_month}")
+                
+                col1, col2, col3, col4 = st.columns(4)
+                
+                with col1:
+                    st.metric(
+                        get_text('active_sellers_month'),
+                        f"{summary['active_sellers']:,}",
+                        delta=f"{summary['active_sellers']/summary['total_sellers']*100:.1f}%"
+                    )
+                
+                with col2:
+                    st.metric(
+                        get_text('monthly_gmv'),
+                        f"R$ {summary['total_gmv']:,.0f}",
+                        delta=f"R$ {summary['avg_gmv_per_seller']:,.0f} 均值"
+                    )
+                
+                with col3:
+                    st.metric(
+                        get_text('avg_rating_month'),
+                        f"{summary['avg_rating']:.2f}",
+                        delta="⭐"
+                    )
+                
+                with col4:
+                    st.metric(
+                        "总订单数",
+                        f"{summary['total_orders']:,}",
+                        delta=f"{summary['total_orders']/summary['active_sellers']:.1f} 均值"
+                    )
+                
+                # 层级分布
+                st.markdown(f"### 🏆 {selected_month} 月份层级分布")
+                
+                tier_dist = pd.DataFrame(
+                    list(summary['tier_distribution'].items()),
+                    columns=['层级', '卖家数']
+                )
+                
+                fig_tier = px.bar(
+                    tier_dist, 
+                    x='层级', 
+                    y='卖家数',
+                    title=f"{selected_month} 月份卖家层级分布",
+                    color='层级'
+                )
+                st.plotly_chart(fig_tier, use_container_width=True)
+                
+                # 层级流转分析（如果有多个月数据）
+                if len(available_months) >= 2:
+                    st.markdown(f"### {get_text('tier_flow_matrix')}")
+                    
+                    # 选择对比月份
+                    recent_months = available_months[-3:] if len(available_months) >= 3 else available_months[-2:]
+                    
+                    if selected_month in recent_months:
+                        tier_analysis = analyzer.analyze_tier_changes(recent_months)
+                        
+                        if not tier_analysis['tier_flow_matrix'].empty:
+                            flow_matrix = tier_analysis['tier_flow_matrix']
+                            
+                            # 显示流转矩阵
+                            col1, col2 = st.columns(2)
+                            
+                            with col1:
+                                st.markdown("#### 📊 流转矩阵")
+                                st.dataframe(flow_matrix, use_container_width=True)
+                            
+                            with col2:
+                                st.markdown("#### ⚖️ 层级稳定性")
+                                stability = tier_analysis['tier_stability']
+                                
+                                stability_data = []
+                                for tier, stats in stability.items():
+                                    stability_data.append({
+                                        '层级': tier,
+                                        '总数': stats['total_sellers'],
+                                        '稳定数': stats['stable_sellers'],
+                                        '稳定率': f"{stats['stability_rate']*100:.1f}%"
+                                    })
+                                
+                                stability_df = pd.DataFrame(stability_data)
+                                st.dataframe(stability_df, use_container_width=True)
+                        
+                        # 生成流转洞察
+                        if 'All' in flow_matrix.index and 'All' in flow_matrix.columns:
+                            total_sellers = flow_matrix.loc['All', 'All']
+                            
+                            # 计算升级和降级
+                            tier_order = ['Basic', 'Bronze', 'Silver', 'Gold', 'Platinum']
+                            upgrade_count = 0
+                            downgrade_count = 0
+                            
+                            for i, tier_from in enumerate(tier_order):
+                                if tier_from not in flow_matrix.index:
+                                    continue
+                                for j, tier_to in enumerate(tier_order):
+                                    if tier_to not in flow_matrix.columns:
+                                        continue
+                                    count = flow_matrix.loc[tier_from, tier_to]
+                                    if i < j:  # 升级
+                                        upgrade_count += count
+                                    elif i > j:  # 降级
+                                        downgrade_count += count
+                            
+                            st.markdown("#### 💡 关键洞察")
+                            col1, col2, col3 = st.columns(3)
+                            
+                            with col1:
+                                st.metric(get_text('upgrade_sellers'), f"{upgrade_count:,}", delta="⬆️")
+                            
+                            with col2:
+                                st.metric(get_text('downgrade_sellers'), f"{downgrade_count:,}", delta="⬇️")
+                            
+                            with col3:
+                                upgrade_ratio = upgrade_count / max(downgrade_count, 1)
+                                st.metric("升降级比", f"{upgrade_ratio:.2f}", delta="📊")
+                            
+                            # 业务建议
+                            st.markdown("#### 🎯 业务建议")
+                            if upgrade_ratio < 0.5:
+                                st.warning("⚠️ 降级卖家过多，建议加强卖家支持和培训")
+                            elif upgrade_ratio > 2.0:
+                                st.success("✅ 卖家整体表现良好，升级趋势明显")
+                            else:
+                                st.info("📊 卖家层级变化正常，保持当前策略")
+                
+    except Exception as e:
+        st.error(f"月度分析功能出错: {str(e)}")
+        st.info("请确保已安装月度分析依赖，或使用传统分析功能")
+
 def main():
     """主函数"""
     # 语言选择器
@@ -901,9 +1137,9 @@ def main():
     display_kpi_metrics(filtered_data)
     
     # 创建标签页
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         get_text('tab_overview'), get_text('tab_tier'), get_text('tab_geo'), 
-        get_text('tab_performance'), get_text('tab_insights')
+        get_text('tab_performance'), get_text('tab_insights'), get_text('tab_monthly')
     ])
     
     with tab1:
@@ -1017,6 +1253,9 @@ def main():
                 file_name=f"olist_filtered_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                 mime="text/csv"
             )
+    
+    with tab6:
+        create_monthly_analysis_tab()
 
     # 页脚
     st.markdown("---")
