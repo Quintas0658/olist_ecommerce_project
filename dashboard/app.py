@@ -20,11 +20,18 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # 添加项目路径
-sys.path.append('..')
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
+
+# 导入月度分析模块
+MonthlySellerAnalyzer = None
 try:
     from src.monthly_analysis import MonthlySellerAnalyzer
-except ImportError:
-    st.warning("月度分析模块导入失败，部分功能将不可用")
+    MONTHLY_ANALYSIS_AVAILABLE = True
+except ImportError as e:
+    MONTHLY_ANALYSIS_AVAILABLE = False
+    st.sidebar.warning("⚠️ 月度分析模块不可用")
 
 # ======================== 语言管理系统 ========================
 
@@ -923,6 +930,18 @@ def display_business_insights(data):
 def create_monthly_analysis_tab():
     """创建月度分析标签页"""
     st.markdown(f"## {get_text('monthly_analysis')}")
+    
+    # 检查模块是否可用
+    if not MONTHLY_ANALYSIS_AVAILABLE or MonthlySellerAnalyzer is None:
+        st.error("📦 月度分析功能不可用")
+        st.info("请确保已正确安装所有依赖模块")
+        st.code("""
+        # 可能的解决方案：
+        1. 检查 src/monthly_analysis.py 文件是否存在
+        2. 确保所有依赖已安装：pip install pandas numpy
+        3. 重启 Streamlit 应用
+        """)
+        return
     
     try:
         # 初始化月度分析器
