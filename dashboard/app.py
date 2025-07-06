@@ -977,8 +977,21 @@ def show_monthly_analysis(data_pipeline):
             )
             
             # 回望期设置
-            lookback_months = st.slider("📆 数据回望月数", 1, 12, 3, 
-                                      help="计算卖家指标时回望的历史月份数")
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                lookback_months = st.slider("📆 数据回望月数", 1, 12, 3, 
+                                          help="🔍 数据回望逻辑说明：\n\n" +
+                                               "• 向前追溯N个月的历史数据来计算累积指标\n" +
+                                               "• 例如：分析2018-10月，回望3个月 = 使用2018-08~10月数据\n" +
+                                               "• 好处：平滑单月波动，提供更稳定的分层标准\n\n" +
+                                               "推荐设置：\n" +
+                                               "• 1个月：实时监控（波动大）\n" +
+                                               "• 3个月：常规分析（平衡性最佳）⭐\n" +
+                                               "• 6个月：长期趋势（反应滞后）")
+            with col2:
+                st.markdown("")
+                if st.button("📖", help="查看详细的数据回望逻辑说明文档"):
+                    st.info("📄 详细文档：docs/Monthly_Analysis_Lookback_Logic.md")
             
             if st.button("🔍 开始同比环比分析", type="primary"):
                 with st.spinner("🔄 正在进行同比环比分析..."):
@@ -1039,7 +1052,21 @@ def show_monthly_analysis(data_pipeline):
             end_month = st.selectbox("📅 结束月份", available_months,
                                    index=len(available_months)-1)
             
-            lookback_months = st.slider("📆 数据回望月数", 1, 12, 3)
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                lookback_months = st.slider("📆 数据回望月数", 1, 12, 3,
+                                          help="🔍 数据回望逻辑说明：\n\n" +
+                                               "• 向前追溯N个月的历史数据来计算累积指标\n" +
+                                               "• 例如：分析2018-10月，回望3个月 = 使用2018-08~10月数据\n" +
+                                               "• 好处：平滑单月波动，提供更稳定的分层标准\n\n" +
+                                               "推荐设置：\n" +
+                                               "• 1个月：实时监控（波动大）\n" +
+                                               "• 3个月：常规分析（平衡性最佳）⭐\n" +
+                                               "• 6个月：长期趋势（反应滞后）")
+            with col2:
+                st.markdown("")
+                if st.button("📖 详情", help="查看详细的数据回望逻辑说明文档", key="lookback_help_flow"):
+                    st.info("📄 详细文档：docs/Monthly_Analysis_Lookback_Logic.md")
             
             # 生成月份列表
             start_idx = available_months.index(start_month)
@@ -1291,9 +1318,17 @@ def display_flow_results(flow_result, analysis_months):
         # 显示层级稳定性
         if 'tier_stability' in flow_result:
             st.markdown("#### 📈 层级稳定性")
-            stability_df = pd.DataFrame(list(flow_result['tier_stability'].items()),
-                                      columns=['层级', '稳定性(%)'])
-            stability_df['稳定性(%)'] = stability_df['稳定性(%)'].round(1)
+            # 正确处理嵌套的稳定性数据结构
+            stability_data = []
+            for tier, metrics in flow_result['tier_stability'].items():
+                if isinstance(metrics, dict) and 'stability_rate' in metrics:
+                    stability_rate = metrics['stability_rate'] * 100  # 转换为百分比
+                    stability_data.append([tier, round(stability_rate, 1)])
+                else:
+                    # 兼容旧格式（如果metrics直接是数值）
+                    stability_data.append([tier, round(float(metrics) * 100, 1)])
+            
+            stability_df = pd.DataFrame(stability_data, columns=['层级', '稳定性(%)'])
             
             fig = px.bar(stability_df, x='层级', y='稳定性(%)', 
                         title='各层级稳定性对比')
