@@ -2,6 +2,22 @@
 
 🌐 **Language / 语言**: [🇨🇳 中文](README.md) | [🇺🇸 English](README_EN.md)
 
+## ⚠️ Project Disclaimer
+
+**This is a simplified data analysis project designed to demonstrate BI analysis methodology and technical implementation.** The project has been simplified in the following aspects:
+
+- 📊 **Time Dimension Simplified**: Primarily based on static data slices, without deep time series analysis
+- 🎯 **Business Logic Simplified**: Many complex business scenarios in real e-commerce have been ignored
+- 🔢 **Metrics System Simplified**: Does not cover the complete commercial indicator system
+
+**Real-world BI work is much more complex and exciting:**
+- 🤝 **Deep Business Understanding**: BI analysts need to deeply understand business processes, pain points, and objectives
+- 🔄 **Dynamic Analysis**: Time dimension analysis, trend forecasting, seasonal analysis are crucial
+- 💡 **Business-Driven**: Start from business problems, simplify complex issues, use data to support business decisions
+- 🎯 **Collaborative Innovation**: Work closely with business teams to transform data insights into executable business strategies
+
+*The value of data analysis lies in solving real business problems - this is what makes BI work so exciting!*
+
 ## 📊 Project Overview
 
 An **enterprise-level e-commerce data analysis platform** based on real data from Olist, Brazil's largest e-commerce platform, providing comprehensive seller lifecycle management and business intelligence analysis.
