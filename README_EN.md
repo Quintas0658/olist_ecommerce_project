@@ -18,6 +18,16 @@
 
 *The value of data analysis lies in solving real business problems - this is what makes BI work so exciting!*
 
+## 🌟 Live Demo
+
+### 🚀 [Experience Now - Streamlit Cloud Deployment](https://olistecommerce.streamlit.app/)
+
+- **🌐 Complete Bilingual Support** - Switch between Chinese and English instantly
+- **📊 Five Analysis Modules** - Overview/Tier/Geographic/Performance/Insights
+- **🎯 Interactive Filtering** - Real-time data filtering and analysis
+- **📱 Responsive Design** - Support for desktop, tablet, and mobile access
+- **⚡ No Installation Required** - Direct browser access with fast loading
+
 ## 📊 Project Overview
 
 An **enterprise-level e-commerce data analysis platform** based on real data from Olist, Brazil's largest e-commerce platform, providing comprehensive seller lifecycle management and business intelligence analysis.
@@ -52,6 +62,8 @@ olist_ecommerce_project/
 ```
 
 ## 🚀 Quick Start
+
+> 💡 **Want to try it now?** Visit the [Live Demo](https://olistecommerce.streamlit.app/) - no installation required!
 
 ### 1. Environment Setup
 
@@ -148,6 +160,9 @@ jupyter notebook notebooks/
 ## 🌐 Cloud Deployment
 
 ### Streamlit Cloud (Free Recommended)
+
+**🌟 This project is successfully deployed**: [https://olistecommerce.streamlit.app/](https://olistecommerce.streamlit.app/)
+
 ```bash
 # 1. Push code to GitHub
 git add .
@@ -155,9 +170,20 @@ git commit -m "Deploy BI Dashboard"
 git push origin main
 
 # 2. Visit https://share.streamlit.io
-# 3. Connect GitHub repository, select dashboard/app.py
-# 4. Click Deploy
+# 3. Connect GitHub repository
+# 4. Configure deployment parameters:
+#    - Repository: Your GitHub repository URL
+#    - Branch: main
+#    - Main file path: dashboard/app.py
+# 5. Click Deploy
 ```
+
+**Deployment Configuration**：
+- ✅ Project includes necessary data files
+- ✅ requirements.txt is fully configured
+- ✅ Supports automatic data initialization
+- ✅ Complete bilingual switching functionality
+- ✅ Verified stable online operation
 
 ### Docker Deployment
 ```dockerfile
