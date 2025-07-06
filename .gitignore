@@ -36,11 +36,19 @@ env/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Data files (if large)
-*.csv
-*.parquet
-*.pkl
-*.pickle
+# Large data files (ignore original datasets)
+data/olist_*.csv
+data/*.parquet
+data/*.pkl
+data/*.pickle
+
+# Keep processed/analysis result files
+!data/seller_profile_processed.csv
+!data/seller_analysis_results.csv
+!data/active_sellers_profile.csv
+!data/business_tier_summary.csv
+!data/high_potential_sellers.csv
+!data/product_category_name_translation.csv
 
 # OS generated files
 .DS_Store

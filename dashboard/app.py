@@ -14,6 +14,7 @@ from plotly.subplots import make_subplots
 import seaborn as sns
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
+import os
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -235,6 +236,23 @@ def create_language_selector():
     
     return st.session_state.language
 
+def classify_seller_tier(row):
+    """卖家分级函数"""
+    gmv = row['total_gmv']
+    orders_count = row['unique_orders']
+    rating = row['avg_review_score']
+    
+    if gmv >= 50000 and orders_count >= 200 and rating >= 4.0:
+        return 'Platinum'
+    elif gmv >= 10000 and orders_count >= 50:
+        return 'Gold'
+    elif gmv >= 2000 and orders_count >= 10:
+        return 'Silver'
+    elif gmv >= 500 and orders_count >= 3:
+        return 'Bronze'
+    else:
+        return 'Basic'
+
 # 页面配置
 st.set_page_config(
     page_title="Olist BI Analytics Dashboard",
@@ -279,47 +297,99 @@ st.markdown("""
 def load_data():
     """加载和缓存数据"""
     try:
-        # 加载处理后的数据
-        seller_profile = pd.read_csv('data/seller_profile_processed.csv')
+        # 尝试加载处理后的数据
+        if os.path.exists('data/seller_profile_processed.csv'):
+            seller_profile = pd.read_csv('data/seller_profile_processed.csv')
+        else:
+            # 如果处理后的数据不存在，创建示例数据
+            seller_profile = create_sample_data()
         
-        # 加载原始数据用于深度分析
-        orders = pd.read_csv('data/olist_orders_dataset.csv')
-        order_items = pd.read_csv('data/olist_order_items_dataset.csv')
-        reviews = pd.read_csv('data/olist_order_reviews_dataset.csv')
-        products = pd.read_csv('data/olist_products_dataset.csv')
+        # 尝试加载原始数据用于深度分析
+        orders = None
+        order_items = None
+        reviews = None
+        products = None
         
-        # 时间处理
-        orders['order_purchase_timestamp'] = pd.to_datetime(orders['order_purchase_timestamp'])
-        orders['year_month'] = orders['order_purchase_timestamp'].dt.to_period('M').astype(str)
+        try:
+            if os.path.exists('data/olist_orders_dataset.csv'):
+                orders = pd.read_csv('data/olist_orders_dataset.csv')
+                orders['order_purchase_timestamp'] = pd.to_datetime(orders['order_purchase_timestamp'])
+                orders['year_month'] = orders['order_purchase_timestamp'].dt.to_period('M').astype(str)
+        except:
+            pass
+            
+        try:
+            if os.path.exists('data/olist_order_items_dataset.csv'):
+                order_items = pd.read_csv('data/olist_order_items_dataset.csv')
+        except:
+            pass
+            
+        try:
+            if os.path.exists('data/olist_order_reviews_dataset.csv'):
+                reviews = pd.read_csv('data/olist_order_reviews_dataset.csv')
+        except:
+            pass
+            
+        try:
+            if os.path.exists('data/olist_products_dataset.csv'):
+                products = pd.read_csv('data/olist_products_dataset.csv')
+        except:
+            pass
         
         # 加载分析结果
         try:
-            seller_analysis = pd.read_csv('data/seller_analysis_results.csv')
+            if os.path.exists('data/seller_analysis_results.csv'):
+                seller_analysis = pd.read_csv('data/seller_analysis_results.csv')
+            else:
+                # 如果没有分析结果，创建简单分级
+                seller_profile['business_tier'] = seller_profile.apply(classify_seller_tier, axis=1)
+                seller_analysis = seller_profile
         except:
-            # 如果没有分析结果，创建简单分级
-            def classify_seller(row):
-                gmv = row['total_gmv']
-                orders_count = row['unique_orders']
-                rating = row['avg_review_score']
-                
-                if gmv >= 50000 and orders_count >= 200 and rating >= 4.0:
-                    return 'Platinum'
-                elif gmv >= 10000 and orders_count >= 50:
-                    return 'Gold'
-                elif gmv >= 2000 and orders_count >= 10:
-                    return 'Silver'
-                elif gmv >= 500 and orders_count >= 3:
-                    return 'Bronze'
-                else:
-                    return 'Basic'
-            
-            seller_profile['business_tier'] = seller_profile.apply(classify_seller, axis=1)
+            seller_profile['business_tier'] = seller_profile.apply(classify_seller_tier, axis=1)
             seller_analysis = seller_profile
         
         return seller_profile, seller_analysis, orders, order_items, reviews, products
     except Exception as e:
-        st.error(f"数据加载失败: {e}")
+        st.error(f"{get_text('data_load_error')}: {e}")
         return None, None, None, None, None, None
+
+def create_sample_data():
+    """创建示例数据用于演示"""
+    np.random.seed(42)
+    
+    # 巴西州名列表
+    states = ['SP', 'RJ', 'MG', 'RS', 'PR', 'SC', 'BA', 'GO', 'PE', 'CE', 
+              'PA', 'DF', 'ES', 'PB', 'RN', 'MT', 'MS', 'PI', 'AL', 'RO']
+    
+    n_sellers = 1000
+    
+    # 生成示例数据
+    data = {
+        'seller_id': [f'seller_{i:04d}' for i in range(n_sellers)],
+        'seller_state': np.random.choice(states, n_sellers),
+        'total_gmv': np.random.lognormal(8, 1.5, n_sellers),
+        'unique_orders': np.random.poisson(20, n_sellers) + 1,
+        'avg_review_score': np.random.beta(8, 2, n_sellers) * 5,
+        'category_count': np.random.poisson(2, n_sellers) + 1,
+        'avg_shipping_days': np.random.gamma(2, 3, n_sellers) + 1,
+        'delivery_success_rate': np.random.beta(9, 1, n_sellers),
+        'bad_review_rate': np.random.beta(1, 9, n_sellers),
+        'revenue_per_order': np.random.lognormal(4, 0.8, n_sellers),
+        'items_per_order': np.random.gamma(2, 1, n_sellers) + 1
+    }
+    
+    df = pd.DataFrame(data)
+    
+    # 确保数据的合理性
+    df['total_gmv'] = np.clip(df['total_gmv'], 100, 1000000)
+    df['unique_orders'] = np.clip(df['unique_orders'], 1, 1000)
+    df['avg_review_score'] = np.clip(df['avg_review_score'], 1, 5)
+    df['category_count'] = np.clip(df['category_count'], 1, 20)
+    df['avg_shipping_days'] = np.clip(df['avg_shipping_days'], 1, 30)
+    df['delivery_success_rate'] = np.clip(df['delivery_success_rate'], 0.5, 1.0)
+    df['bad_review_rate'] = np.clip(df['bad_review_rate'], 0, 0.5)
+    
+    return df
 
 def create_sidebar_filters(seller_analysis):
     """创建侧边栏筛选器"""
