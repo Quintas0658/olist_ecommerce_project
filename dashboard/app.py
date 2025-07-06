@@ -927,201 +927,375 @@ def display_business_insights(data):
         
         st.markdown('</div>', unsafe_allow_html=True)
 
-def create_monthly_analysis_tab():
-    """创建月度分析标签页"""
-    st.markdown(f"## {get_text('monthly_analysis')}")
+def show_monthly_analysis():
+    """显示月度分析"""
     
-    # 检查模块是否可用
-    if not MONTHLY_ANALYSIS_AVAILABLE or MonthlySellerAnalyzer is None:
-        st.error("📦 月度分析功能不可用")
-        st.info("请确保已正确安装所有依赖模块")
-        st.code("""
-        # 可能的解决方案：
-        1. 检查 src/monthly_analysis.py 文件是否存在
-        2. 确保所有依赖已安装：pip install pandas numpy
-        3. 重启 Streamlit 应用
-        """)
+    # 检查模块可用性
+    if not monthly_analyzer_available:
+        if st.session_state.language == 'zh':
+            st.error("❌ 月度分析模块不可用")
+            st.info("📝 请确保 src/monthly_analysis.py 文件存在且正确配置")
+        else:
+            st.error("❌ Monthly Analysis module not available")
+            st.info("📝 Please ensure src/monthly_analysis.py exists and is properly configured")
         return
     
-    try:
-        # 初始化月度分析器
-        analyzer = MonthlySellerAnalyzer()
+    if st.session_state.language == 'zh':
+        st.title("📅 月度卖家层级分析")
+        st.markdown("---")
         
-        # 获取可用月份
+        # 创建分析器
+        analyzer = MonthlySellerAnalyzer(data_pipeline)
         available_months = analyzer.get_available_months()
         
         if not available_months:
-            st.error(get_text('no_monthly_data'))
+            st.error("❌ 没有可用的月度数据")
             return
         
-        # 显示数据基本信息
-        col1, col2 = st.columns(2)
-        with col1:
-            st.info(f"📅 {get_text('data_timespan')}: {available_months[0]} ~ {available_months[-1]}")
-        with col2:
-            st.info(f"📊 总月数: {len(available_months)} 个月")
+        # 侧边栏控制
+        st.sidebar.markdown("### 📊 分析配置")
         
-        # 月份选择器
-        st.markdown(f"### {get_text('month_selection')}")
+        # 分析类型选择
+        analysis_type = st.sidebar.selectbox(
+            "🔍 选择分析类型",
+            ["同比环比分析", "多月轨迹分析", "层级流转分析"],
+            help="选择不同的分析维度"
+        )
         
-        col1, col2 = st.columns(2)
-        with col1:
-            # 选择目标月份（默认最后一个月）
+        if analysis_type == "同比环比分析":
+            # 同比环比分析
+            st.subheader("📈 同比环比分析")
+            
+            # 月份选择
             selected_month = st.selectbox(
-                "目标月份",
+                "📅 选择目标月份",
                 available_months,
-                index=len(available_months)-1
+                index=len(available_months)-1,  # 默认最新月份
+                help="将分析此月份与环比（上月）、同比（去年同月）的对比"
             )
+            
+            # 回望期设置
+            lookback_months = st.slider("📆 数据回望月数", 1, 12, 3, 
+                                      help="计算卖家指标时回望的历史月份数")
+            
+            if st.button("🔍 开始同比环比分析", type="primary"):
+                with st.spinner("🔄 正在进行同比环比分析..."):
+                    # 先构建目标月份画像
+                    analyzer.build_monthly_seller_profile(selected_month, lookback_months)
+                    
+                    # 执行同比环比分析
+                    comparison_result = analyzer.analyze_period_comparison(selected_month)
+                    
+                    if comparison_result and ('mom_comparison' in comparison_result or 'yoy_comparison' in comparison_result):
+                        # 显示分析结果
+                        display_comparison_results(comparison_result, selected_month)
+                    else:
+                        st.warning("⚠️ 无法获取对比数据，请检查历史月份数据")
+        
+        elif analysis_type == "多月轨迹分析":
+            # 多月轨迹分析
+            st.subheader("🛤️ 卖家轨迹分析")
+            
+            # 月份范围选择
+            col1, col2 = st.columns(2)
+            with col1:
+                start_month = st.selectbox("📅 起始月份", available_months, 
+                                         index=max(0, len(available_months)-6))
+            with col2:
+                end_month = st.selectbox("📅 结束月份", available_months,
+                                       index=len(available_months)-1)
+            
+            # 参数设置
+            min_months = st.slider("📊 最少数据月数", 2, 6, 3,
+                                 help="卖家至少需要的有效月份数据")
+            
+            # 生成月份列表
+            start_idx = available_months.index(start_month)
+            end_idx = available_months.index(end_month)
+            if start_idx <= end_idx:
+                analysis_months = available_months[start_idx:end_idx+1]
+                st.info(f"📊 将分析 {len(analysis_months)} 个月份: {', '.join(analysis_months)}")
+                
+                if st.button("🔍 开始轨迹分析", type="primary"):
+                    with st.spinner("🔄 正在分析卖家轨迹..."):
+                        trajectory_result = analyzer.analyze_seller_trajectory(analysis_months, min_months)
+                        
+                        if 'error' not in trajectory_result:
+                            display_trajectory_results(trajectory_result)
+                        else:
+                            st.error(f"❌ {trajectory_result['error']}")
+            else:
+                st.error("❌ 起始月份不能晚于结束月份")
+        
+        else:  # 层级流转分析
+            # 原有的层级流转分析
+            st.subheader("🔄 层级流转分析")
+            
+            # 月份选择
+            start_month = st.selectbox("📅 起始月份", available_months, 
+                                     index=max(0, len(available_months)-3))
+            end_month = st.selectbox("📅 结束月份", available_months,
+                                   index=len(available_months)-1)
+            
+            lookback_months = st.slider("📆 数据回望月数", 1, 12, 3)
+            
+            # 生成月份列表
+            start_idx = available_months.index(start_month)
+            end_idx = available_months.index(end_month)
+            if start_idx <= end_idx:
+                analysis_months = available_months[start_idx:end_idx+1]
+                
+                if st.button("🔍 开始层级流转分析", type="primary"):
+                    with st.spinner("🔄 正在分析层级流转..."):
+                        # 构建选定月份的画像
+                        for month in analysis_months:
+                            analyzer.build_monthly_seller_profile(month, lookback_months)
+                        
+                        # 分析层级变化
+                        flow_result = analyzer.analyze_tier_changes(analysis_months)
+                        
+                        if not flow_result.empty and isinstance(flow_result, dict):
+                            display_flow_results(flow_result, analysis_months)
+                        else:
+                            st.warning("⚠️ 暂无层级流转数据")
+            else:
+                st.error("❌ 起始月份不能晚于结束月份")
+    
+    else:
+        # English version
+        st.title("📅 Monthly Seller Tier Analysis")
+        st.markdown("---")
+        
+        # 创建分析器
+        analyzer = MonthlySellerAnalyzer(data_pipeline)
+        available_months = analyzer.get_available_months()
+        
+        if not available_months:
+            st.error("❌ No monthly data available")
+            return
+        
+        # Sidebar controls
+        st.sidebar.markdown("### 📊 Analysis Configuration")
+        
+        # Analysis type selection
+        analysis_type = st.sidebar.selectbox(
+            "🔍 Select Analysis Type",
+            ["Period Comparison", "Trajectory Analysis", "Tier Flow Analysis"],
+            help="Choose different analysis dimensions"
+        )
+        
+        # 英文版本的实现类似...
+        st.info("🚧 English interface for new features coming soon...")
+
+
+def display_comparison_results(comparison_result, target_month):
+    """显示同比环比分析结果"""
+    st.markdown("### 📊 分析结果")
+    
+    # 环比分析
+    if comparison_result.get('mom_comparison'):
+        mom_data = comparison_result['mom_comparison']
+        st.markdown("#### 📈 环比分析 (Month-over-Month)")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        stats = mom_data['summary_stats']
+        
+        with col1:
+            st.metric("共同卖家", f"{stats['total_sellers']:,}")
+        with col2:
+            st.metric("升级卖家", f"{stats['upgraded_count']:,}", 
+                     f"{stats['upgrade_rate']:.1f}%")
+        with col3:
+            st.metric("降级卖家", f"{stats['downgraded_count']:,}", 
+                     f"-{stats['downgrade_rate']:.1f}%")
+        with col4:
+            st.metric("稳定卖家", f"{stats['stable_count']:,}", 
+                     f"{stats['stability_rate']:.1f}%")
+        
+        # 显示流转矩阵
+        st.markdown("##### 📊 环比流转矩阵")
+        st.dataframe(mom_data['flow_matrix'], use_container_width=True)
+        
+        # 升级降级明细
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if len(mom_data['upgraded_sellers']) > 0:
+                st.markdown("##### 📈 升级卖家明细 (前10名)")
+                upgraded_display = mom_data['upgraded_sellers'].head(10)[
+                    ['seller_id', f'business_tier_{mom_data["month2"]}', 
+                     f'business_tier_{mom_data["month1"]}', 'tier_change']
+                ].rename(columns={
+                    f'business_tier_{mom_data["month2"]}': '原层级',
+                    f'business_tier_{mom_data["month1"]}': '新层级',
+                    'tier_change': '升级幅度'
+                })
+                st.dataframe(upgraded_display, use_container_width=True)
+            else:
+                st.info("📈 本月无升级卖家")
         
         with col2:
-            # 回望月数
-            lookback = st.slider(get_text('lookback_months'), 1, 6, 3)
+            if len(mom_data['downgraded_sellers']) > 0:
+                st.markdown("##### 📉 降级卖家明细 (前10名)")
+                downgraded_display = mom_data['downgraded_sellers'].head(10)[
+                    ['seller_id', f'business_tier_{mom_data["month2"]}', 
+                     f'business_tier_{mom_data["month1"]}', 'tier_change']
+                ].rename(columns={
+                    f'business_tier_{mom_data["month2"]}': '原层级',
+                    f'business_tier_{mom_data["month1"]}': '新层级', 
+                    'tier_change': '降级幅度'
+                })
+                st.dataframe(downgraded_display, use_container_width=True)
+            else:
+                st.info("📉 本月无降级卖家")
+    
+    # 同比分析
+    if comparison_result.get('yoy_comparison'):
+        st.markdown("---")
+        yoy_data = comparison_result['yoy_comparison']
+        st.markdown("#### 📅 同比分析 (Year-over-Year)")
         
-        # 分析按钮
-        if st.button("🔍 开始分析", type="primary"):
-            with st.spinner("正在分析月度数据..."):
-                # 构建月度画像
-                monthly_profile = analyzer.build_monthly_seller_profile(selected_month, lookback)
-                
-                if monthly_profile.empty:
-                    st.warning(f"⚠️ {selected_month} 月份无数据")
-                    return
-                
-                # 获取月度摘要
-                summary = analyzer.get_monthly_summary(selected_month)
-                
-                # 显示月度KPI
-                st.markdown(f"### {get_text('monthly_kpi')} - {selected_month}")
-                
-                col1, col2, col3, col4 = st.columns(4)
-                
-                with col1:
-                    st.metric(
-                        get_text('active_sellers_month'),
-                        f"{summary['active_sellers']:,}",
-                        delta=f"{summary['active_sellers']/summary['total_sellers']*100:.1f}%"
-                    )
-                
-                with col2:
-                    st.metric(
-                        get_text('monthly_gmv'),
-                        f"R$ {summary['total_gmv']:,.0f}",
-                        delta=f"R$ {summary['avg_gmv_per_seller']:,.0f} 均值"
-                    )
-                
-                with col3:
-                    st.metric(
-                        get_text('avg_rating_month'),
-                        f"{summary['avg_rating']:.2f}",
-                        delta="⭐"
-                    )
-                
-                with col4:
-                    st.metric(
-                        "总订单数",
-                        f"{summary['total_orders']:,}",
-                        delta=f"{summary['total_orders']/summary['active_sellers']:.1f} 均值"
-                    )
-                
-                # 层级分布
-                st.markdown(f"### 🏆 {selected_month} 月份层级分布")
-                
-                tier_dist = pd.DataFrame(
-                    list(summary['tier_distribution'].items()),
-                    columns=['层级', '卖家数']
-                )
-                
-                fig_tier = px.bar(
-                    tier_dist, 
-                    x='层级', 
-                    y='卖家数',
-                    title=f"{selected_month} 月份卖家层级分布",
-                    color='层级'
-                )
-                st.plotly_chart(fig_tier, use_container_width=True)
-                
-                # 层级流转分析（如果有多个月数据）
-                if len(available_months) >= 2:
-                    st.markdown(f"### {get_text('tier_flow_matrix')}")
-                    
-                    # 选择对比月份
-                    recent_months = available_months[-3:] if len(available_months) >= 3 else available_months[-2:]
-                    
-                    if selected_month in recent_months:
-                        tier_analysis = analyzer.analyze_tier_changes(recent_months)
-                        
-                        if not tier_analysis['tier_flow_matrix'].empty:
-                            flow_matrix = tier_analysis['tier_flow_matrix']
-                            
-                            # 显示流转矩阵
-                            col1, col2 = st.columns(2)
-                            
-                            with col1:
-                                st.markdown("#### 📊 流转矩阵")
-                                st.dataframe(flow_matrix, use_container_width=True)
-                            
-                            with col2:
-                                st.markdown("#### ⚖️ 层级稳定性")
-                                stability = tier_analysis['tier_stability']
-                                
-                                stability_data = []
-                                for tier, stats in stability.items():
-                                    stability_data.append({
-                                        '层级': tier,
-                                        '总数': stats['total_sellers'],
-                                        '稳定数': stats['stable_sellers'],
-                                        '稳定率': f"{stats['stability_rate']*100:.1f}%"
-                                    })
-                                
-                                stability_df = pd.DataFrame(stability_data)
-                                st.dataframe(stability_df, use_container_width=True)
-                        
-                        # 生成流转洞察
-                        if 'All' in flow_matrix.index and 'All' in flow_matrix.columns:
-                            total_sellers = flow_matrix.loc['All', 'All']
-                            
-                            # 计算升级和降级
-                            tier_order = ['Basic', 'Bronze', 'Silver', 'Gold', 'Platinum']
-                            upgrade_count = 0
-                            downgrade_count = 0
-                            
-                            for i, tier_from in enumerate(tier_order):
-                                if tier_from not in flow_matrix.index:
-                                    continue
-                                for j, tier_to in enumerate(tier_order):
-                                    if tier_to not in flow_matrix.columns:
-                                        continue
-                                    count = flow_matrix.loc[tier_from, tier_to]
-                                    if i < j:  # 升级
-                                        upgrade_count += count
-                                    elif i > j:  # 降级
-                                        downgrade_count += count
-                            
-                            st.markdown("#### 💡 关键洞察")
-                            col1, col2, col3 = st.columns(3)
-                            
-                            with col1:
-                                st.metric(get_text('upgrade_sellers'), f"{upgrade_count:,}", delta="⬆️")
-                            
-                            with col2:
-                                st.metric(get_text('downgrade_sellers'), f"{downgrade_count:,}", delta="⬇️")
-                            
-                            with col3:
-                                upgrade_ratio = upgrade_count / max(downgrade_count, 1)
-                                st.metric("升降级比", f"{upgrade_ratio:.2f}", delta="📊")
-                            
-                            # 业务建议
-                            st.markdown("#### 🎯 业务建议")
-                            if upgrade_ratio < 0.5:
-                                st.warning("⚠️ 降级卖家过多，建议加强卖家支持和培训")
-                            elif upgrade_ratio > 2.0:
-                                st.success("✅ 卖家整体表现良好，升级趋势明显")
-                            else:
-                                st.info("📊 卖家层级变化正常，保持当前策略")
-                
-    except Exception as e:
-        st.error(f"月度分析功能出错: {str(e)}")
-        st.info("请确保已安装月度分析依赖，或使用传统分析功能")
+        col1, col2, col3, col4 = st.columns(4)
+        stats = yoy_data['summary_stats']
+        
+        with col1:
+            st.metric("共同卖家", f"{stats['total_sellers']:,}")
+        with col2:
+            st.metric("升级卖家", f"{stats['upgraded_count']:,}", 
+                     f"{stats['upgrade_rate']:.1f}%")
+        with col3:
+            st.metric("降级卖家", f"{stats['downgraded_count']:,}", 
+                     f"-{stats['downgrade_rate']:.1f}%") 
+        with col4:
+            st.metric("稳定卖家", f"{stats['stable_count']:,}", 
+                     f"{stats['stability_rate']:.1f}%")
+        
+        # 显示流转矩阵
+        st.markdown("##### 📊 同比流转矩阵")
+        st.dataframe(yoy_data['flow_matrix'], use_container_width=True)
+
+
+def display_trajectory_results(trajectory_result):
+    """显示轨迹分析结果"""
+    st.markdown("### 🛤️ 轨迹分析结果")
+    
+    # 总体统计
+    col1, col2, col3, col4 = st.columns(4)
+    
+    summary = trajectory_result['trajectory_summary']
+    with col1:
+        st.metric("分析卖家总数", f"{trajectory_result['total_sellers']:,}")
+    with col2:
+        st.metric("持续上升", f"{summary.get('持续上升', 0):,}")
+    with col3:
+        st.metric("持续下降", f"{summary.get('持续下降', 0):,}")
+    with col4:
+        st.metric("频繁波动", f"{summary.get('频繁波动', 0):,}")
+    
+    # 轨迹类型分布
+    st.markdown("#### 📊 轨迹类型分布")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # 饼图
+        fig_pie = px.pie(
+            values=list(summary.values()),
+            names=list(summary.keys()),
+            title="轨迹类型分布"
+        )
+        st.plotly_chart(fig_pie, use_container_width=True)
+    
+    with col2:
+        # 柱状图
+        fig_bar = px.bar(
+            x=list(summary.keys()),
+            y=list(summary.values()),
+            title="轨迹类型数量"
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
+    
+    # 详细轨迹数据
+    st.markdown("#### 📋 详细轨迹数据")
+    
+    # 筛选选项
+    col1, col2 = st.columns(2)
+    with col1:
+        selected_type = st.selectbox(
+            "筛选轨迹类型",
+            ["全部"] + list(summary.keys())
+        )
+    with col2:
+        sort_by = st.selectbox(
+            "排序方式",
+            ["波动率", "趋势值", "变化次数"]
+        )
+    
+    # 数据筛选和排序
+    display_df = trajectory_result['trajectory_data'].copy()
+    
+    if selected_type != "全部":
+        display_df = display_df[display_df['trajectory_type'] == selected_type]
+    
+    sort_columns = {
+        "波动率": "volatility", 
+        "趋势值": "trend",
+        "变化次数": "total_changes"
+    }
+    
+    display_df = display_df.sort_values(sort_columns[sort_by], ascending=False)
+    
+    # 显示数据表
+    st.dataframe(
+        display_df[['seller_id', 'tier_path', 'trajectory_type', 
+                   'total_changes', 'volatility', 'trend']].rename(columns={
+            'seller_id': '卖家ID',
+            'tier_path': '层级轨迹',
+            'trajectory_type': '轨迹类型',
+            'total_changes': '变化次数',
+            'volatility': '波动率',
+            'trend': '趋势值'
+        }),
+        use_container_width=True
+    )
+
+
+def display_flow_results(flow_result, analysis_months):
+    """显示层级流转分析结果 - 保持原有功能"""
+    st.markdown("### 🔄 层级流转分析结果")
+    
+    if 'monthly_data' in flow_result:
+        monthly_data = flow_result['monthly_data']
+        
+        # 显示月度KPI
+        st.markdown("#### 📊 月度关键指标")
+        
+        # 按月汇总
+        monthly_summary = monthly_data.groupby('month').agg({
+            'seller_id': 'count',
+            'total_gmv': 'sum',
+            'unique_orders': 'sum'
+        }).round(2)
+        monthly_summary.columns = ['活跃卖家数', '总GMV', '总订单数']
+        
+        st.dataframe(monthly_summary, use_container_width=True)
+        
+        # 显示层级流转矩阵 
+        if 'tier_flow_matrix' in flow_result and not flow_result['tier_flow_matrix'].empty:
+            st.markdown("#### 🔄 层级流转矩阵")
+            st.info(f"📅 对比最后两个月: {analysis_months[-2]} → {analysis_months[-1]}")
+            st.dataframe(flow_result['tier_flow_matrix'], use_container_width=True)
+        
+        # 显示层级稳定性
+        if 'tier_stability' in flow_result:
+            st.markdown("#### 📈 层级稳定性")
+            stability_df = pd.DataFrame(list(flow_result['tier_stability'].items()),
+                                      columns=['层级', '稳定性(%)'])
+            stability_df['稳定性(%)'] = stability_df['稳定性(%)'].round(1)
+            
+            fig = px.bar(stability_df, x='层级', y='稳定性(%)', 
+                        title='各层级稳定性对比')
+            st.plotly_chart(fig, use_container_width=True)
 
 def main():
     """主函数"""
@@ -1274,7 +1448,7 @@ def main():
             )
     
     with tab6:
-        create_monthly_analysis_tab()
+        show_monthly_analysis()
 
     # 页脚
     st.markdown("---")

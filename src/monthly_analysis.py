@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 class MonthlySellerAnalyzer:
     """月度卖家分析器"""
     
-    def __init__(self, data_path='data/'):
-        self.data_path = data_path
+    def __init__(self, data_pipeline):
+        self.data_pipeline = data_pipeline
         self.raw_data = {}
         self.monthly_profiles = {}
         self.tier_definitions = self._get_tier_definitions()
@@ -35,37 +35,32 @@ class MonthlySellerAnalyzer:
         }
     
     def load_raw_data(self):
-        """加载原始数据"""
+        """从DataPipeline加载原始数据"""
         logger.info("📊 正在加载原始数据...")
         
-        datasets = {
-            'sellers': 'olist_sellers_dataset.csv',
-            'orders': 'olist_orders_dataset.csv',
-            'order_items': 'olist_order_items_dataset.csv',
-            'reviews': 'olist_order_reviews_dataset.csv',
-            'products': 'olist_products_dataset.csv'
-        }
-        
-        for name, filename in datasets.items():
-            try:
-                # 优先从data目录加载，然后尝试archive
-                try:
-                    self.raw_data[name] = pd.read_csv(f"{self.data_path}{filename}")
-                except FileNotFoundError:
-                    self.raw_data[name] = pd.read_csv(f"archive/{filename}")
-                logger.info(f"   ✅ {name}: {len(self.raw_data[name]):,} 记录")
-            except FileNotFoundError:
-                logger.warning(f"   ❌ 未找到 {filename}")
-        
-        # 预处理时间字段
-        if 'orders' in self.raw_data:
-            self.raw_data['orders']['order_purchase_timestamp'] = pd.to_datetime(
-                self.raw_data['orders']['order_purchase_timestamp'], errors='coerce'
-            )
-            self.raw_data['orders']['year_month'] = self.raw_data['orders']['order_purchase_timestamp'].dt.to_period('M')
-        
-        logger.info("✅ 原始数据加载完成")
-        return self.raw_data
+        try:
+            # 使用DataPipeline加载数据
+            self.raw_data = self.data_pipeline.load_raw_data()
+            
+            # 记录数据量
+            for name, data in self.raw_data.items():
+                if data is not None and len(data) > 0:
+                    logger.info(f"   ✅ {name}: {len(data):,} 记录")
+            
+            # 预处理时间字段
+            if 'orders' in self.raw_data and self.raw_data['orders'] is not None:
+                if 'order_purchase_timestamp' in self.raw_data['orders'].columns:
+                    self.raw_data['orders']['order_purchase_timestamp'] = pd.to_datetime(
+                        self.raw_data['orders']['order_purchase_timestamp'], errors='coerce'
+                    )
+                    self.raw_data['orders']['year_month'] = self.raw_data['orders']['order_purchase_timestamp'].dt.to_period('M')
+            
+            logger.info("✅ 原始数据加载完成")
+            return self.raw_data
+            
+        except Exception as e:
+            logger.error(f"❌ 数据加载失败: {e}")
+            return {}
     
     def get_available_months(self):
         """获取可用的月份列表"""
@@ -342,13 +337,227 @@ class MonthlySellerAnalyzer:
             'tier_stability': self._calculate_tier_stability(combined_df)
         }
     
+    def analyze_period_comparison(self, target_month: str):
+        """
+        分析指定月份的同比环比变化
+        
+        Args:
+            target_month: 目标月份，格式 '2018-10'
+        
+        Returns:
+            dict: 包含环比、同比分析结果
+        """
+        logger.info(f"📈 分析 {target_month} 的同比环比变化...")
+        
+        try:
+            target_period = pd.Period(target_month)
+            
+            # 计算环比和同比月份
+            mom_month = str(target_period - 1)  # 环比：上个月
+            yoy_month = str(target_period - 12)  # 同比：去年同月
+            
+            logger.info(f"   环比对比: {target_month} vs {mom_month}")
+            logger.info(f"   同比对比: {target_month} vs {yoy_month}")
+            
+            # 构建必要的月度画像
+            months_to_build = [target_month, mom_month, yoy_month]
+            available_months = self.get_available_months()
+            
+            for month in months_to_build:
+                if month in available_months and month not in self.monthly_profiles:
+                    self.build_monthly_seller_profile(month)
+            
+            result = {
+                'target_month': target_month,
+                'mom_comparison': None,
+                'yoy_comparison': None
+            }
+            
+            # 环比分析
+            if mom_month in available_months and mom_month in self.monthly_profiles:
+                result['mom_comparison'] = self._compare_two_months(
+                    target_month, mom_month, "环比"
+                )
+            else:
+                logger.warning(f"   ⚠️ 环比月份 {mom_month} 数据不可用")
+            
+            # 同比分析
+            if yoy_month in available_months and yoy_month in self.monthly_profiles:
+                result['yoy_comparison'] = self._compare_two_months(
+                    target_month, yoy_month, "同比"
+                )
+            else:
+                logger.warning(f"   ⚠️ 同比月份 {yoy_month} 数据不可用")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"   ❌ 同比环比分析失败: {e}")
+            return {}
+    
+    def _compare_two_months(self, month1: str, month2: str, comparison_type: str):
+        """
+        对比两个月份的层级变化
+        
+        Args:
+            month1: 新月份 (目标月份)
+            month2: 基准月份 (对比月份)
+            comparison_type: 对比类型 ("环比" or "同比")
+        """
+        logger.info(f"   🔍 {comparison_type}分析: {month1} vs {month2}")
+        
+        # 获取两个月份的数据
+        df1 = self.monthly_profiles[month1][['seller_id', 'business_tier', 'total_gmv', 'unique_orders']].copy()
+        df2 = self.monthly_profiles[month2][['seller_id', 'business_tier', 'total_gmv', 'unique_orders']].copy()
+        
+        # 合并数据找到共同卖家
+        merged = df1.merge(
+            df2, 
+            on='seller_id', 
+            suffixes=(f'_{month1}', f'_{month2}'),
+            how='inner'
+        )
+        
+        if len(merged) == 0:
+            return {'error': f'没有共同卖家数据'}
+        
+        # 分析层级变化
+        tier_order = {'Basic': 0, 'Bronze': 1, 'Silver': 2, 'Gold': 3, 'Platinum': 4}
+        
+        merged[f'tier_num_{month1}'] = merged[f'business_tier_{month1}'].map(tier_order)
+        merged[f'tier_num_{month2}'] = merged[f'business_tier_{month2}'].map(tier_order)
+        
+        # 计算层级变化
+        merged['tier_change'] = merged[f'tier_num_{month1}'] - merged[f'tier_num_{month2}']
+        
+        # 分类卖家
+        upgraded_sellers = merged[merged['tier_change'] > 0].copy()
+        downgraded_sellers = merged[merged['tier_change'] < 0].copy()
+        stable_sellers = merged[merged['tier_change'] == 0].copy()
+        
+        # 创建流转矩阵
+        flow_matrix = pd.crosstab(
+            merged[f'business_tier_{month2}'], 
+            merged[f'business_tier_{month1}'], 
+            margins=True
+        )
+        
+        # 计算汇总指标
+        summary_stats = {
+            'total_sellers': len(merged),
+            'upgraded_count': len(upgraded_sellers),
+            'downgraded_count': len(downgraded_sellers),
+            'stable_count': len(stable_sellers),
+            'upgrade_rate': len(upgraded_sellers) / len(merged) * 100,
+            'downgrade_rate': len(downgraded_sellers) / len(merged) * 100,
+            'stability_rate': len(stable_sellers) / len(merged) * 100
+        }
+        
+        return {
+            'comparison_type': comparison_type,
+            'month1': month1,
+            'month2': month2,
+            'summary_stats': summary_stats,
+            'flow_matrix': flow_matrix,
+            'upgraded_sellers': upgraded_sellers,
+            'downgraded_sellers': downgraded_sellers,
+            'stable_sellers': stable_sellers,
+            'merged_data': merged
+        }
+    
+    def analyze_seller_trajectory(self, months_list: List[str], min_months: int = 3):
+        """
+        分析卖家多月轨迹变化
+        
+        Args:
+            months_list: 要分析的月份列表
+            min_months: 最少需要的月份数据
+        """
+        logger.info(f"🛤️ 分析卖家轨迹变化 ({len(months_list)} 个月)")
+        
+        # 构建所有月份的画像
+        for month in months_list:
+            if month not in self.monthly_profiles:
+                self.build_monthly_seller_profile(month)
+        
+        # 合并多月数据
+        trajectory_data = []
+        for month in months_list:
+            if month in self.monthly_profiles:
+                df = self.monthly_profiles[month][['seller_id', 'business_tier']].copy()
+                df['month'] = month
+                trajectory_data.append(df)
+        
+        if len(trajectory_data) < min_months:
+            return {'error': f'需要至少{min_months}个月数据'}
+        
+        combined_df = pd.concat(trajectory_data, ignore_index=True)
+        
+        # 创建透视表：seller_id x month
+        pivot_df = combined_df.pivot(index='seller_id', columns='month', values='business_tier')
+        
+        # 只保留有足够数据的卖家
+        valid_sellers = pivot_df.dropna(thresh=min_months)
+        
+        if len(valid_sellers) == 0:
+            return {'error': '没有卖家有足够的月份数据'}
+        
+        # 分析轨迹模式
+        tier_order = {'Basic': 0, 'Bronze': 1, 'Silver': 2, 'Gold': 3, 'Platinum': 4}
+        
+        trajectory_analysis = []
+        for seller_id, row in valid_sellers.iterrows():
+            # 转换为数值轨迹
+            numeric_tiers = [tier_order.get(tier, 0) for tier in row.dropna()]
+            tier_path = ' → '.join(row.dropna().astype(str))
+            
+            # 计算轨迹特征
+            tier_changes = np.diff(numeric_tiers)
+            total_changes = len(tier_changes[tier_changes != 0])
+            volatility = np.std(numeric_tiers) if len(numeric_tiers) > 1 else 0
+            trend = np.polyfit(range(len(numeric_tiers)), numeric_tiers, 1)[0] if len(numeric_tiers) > 1 else 0
+            
+            # 分类轨迹类型
+            if trend > 0.1:
+                trajectory_type = "持续上升"
+            elif trend < -0.1:
+                trajectory_type = "持续下降"
+            elif volatility > 0.5:
+                trajectory_type = "频繁波动"
+            else:
+                trajectory_type = "相对稳定"
+            
+            trajectory_analysis.append({
+                'seller_id': seller_id,
+                'tier_path': tier_path,
+                'total_changes': total_changes,
+                'volatility': round(volatility, 3),
+                'trend': round(trend, 3),
+                'trajectory_type': trajectory_type,
+                'start_tier': row.dropna().iloc[0],
+                'end_tier': row.dropna().iloc[-1],
+                'data_months': len(row.dropna())
+            })
+        
+        trajectory_df = pd.DataFrame(trajectory_analysis)
+        
+        # 统计各类轨迹
+        trajectory_summary = trajectory_df['trajectory_type'].value_counts().to_dict()
+        
+        return {
+            'trajectory_data': trajectory_df,
+            'trajectory_summary': trajectory_summary,
+            'months_analyzed': months_list,
+            'total_sellers': len(trajectory_df)
+        }
+
     def _create_tier_flow_matrix(self, combined_df, months_list):
-        """创建层级流转矩阵"""
+        """创建层级流转矩阵 - 改为支持最后两个月对比"""
         if len(months_list) < 2:
             return pd.DataFrame()
         
-        # 取前两个月做演示
-        month1, month2 = months_list[0], months_list[1]
+        # 取最后两个月进行对比 (更符合时序逻辑)
+        month1, month2 = months_list[-2], months_list[-1]
         
         df1 = combined_df[combined_df['month'] == month1][['seller_id', 'business_tier']].rename(
             columns={'business_tier': 'tier_from'}
