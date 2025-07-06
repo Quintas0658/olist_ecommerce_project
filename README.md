@@ -139,9 +139,19 @@ git commit -m "Deploy BI Dashboard"
 git push origin main
 
 # 2. 访问 https://share.streamlit.io
-# 3. 连接GitHub仓库，选择 dashboard/app.py
-# 4. 点击Deploy
+# 3. 连接GitHub仓库
+# 4. 配置部署参数：
+#    - Repository: 你的GitHub仓库地址
+#    - Branch: main
+#    - Main file path: dashboard/app.py
+# 5. 点击Deploy
 ```
+
+**部署配置说明**：
+- ✅ 项目已包含必要的数据文件
+- ✅ requirements.txt 已配置完整
+- ✅ 支持自动数据初始化
+- ✅ 中英文切换功能完整
 
 ### Docker部署
 ```dockerfile
