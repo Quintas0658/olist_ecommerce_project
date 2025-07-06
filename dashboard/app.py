@@ -164,6 +164,58 @@ TEXTS = {
         'tier_changes': '层级变化情况',
         'stability_rate': '稳定率',
         'no_monthly_data': '⚠️ 暂无月度数据，请检查数据源',
+        'select_analysis_type': '🔍 选择分析类型',
+        'period_comparison': '同比环比分析',
+        'trajectory_analysis': '多月轨迹分析',
+        'tier_flow_analysis': '层级流转分析',
+        'start_analysis': '🔍 开始分析',
+        'start_period_comparison': '🔍 开始同比环比分析',
+        'start_trajectory_analysis': '🔍 开始轨迹分析',
+        'start_tier_flow_analysis': '🔍 开始层级流转分析',
+        'select_target_month': '📅 选择目标月份',
+        'select_start_month': '📅 起始月份',
+        'select_end_month': '📅 结束月份',
+        'data_lookback_months': '📆 数据回望月数',
+        'min_data_months': '📊 最少数据月数',
+        'analysis_results': '📊 分析结果',
+        'mom_analysis': '📈 环比分析 (Month-over-Month)',
+        'yoy_analysis': '📅 同比分析 (Year-over-Year)',
+        'common_sellers': '共同卖家',
+        'upgraded_sellers': '升级卖家',
+        'downgraded_sellers': '降级卖家',
+        'stable_sellers_count': '稳定卖家',
+        'mom_flow_matrix': '📊 环比流转矩阵',
+        'yoy_flow_matrix': '📊 同比流转矩阵',
+        'upgrade_details': '📈 升级卖家明细 (前10名)',
+        'downgrade_details': '📉 降级卖家明细 (前10名)',
+        'no_upgrades': '📈 本月无升级卖家',
+        'no_downgrades': '📉 本月无降级卖家',
+        'original_tier': '原层级',
+        'new_tier': '新层级',
+        'upgrade_magnitude': '升级幅度',
+        'downgrade_magnitude': '降级幅度',
+        'trajectory_results': '🛤️ 轨迹分析结果',
+        'total_analyzed_sellers': '分析卖家总数',
+        'continuous_rise': '持续上升',
+        'continuous_decline': '持续下降',
+        'frequent_fluctuation': '频繁波动',
+        'trajectory_distribution': '📊 轨迹类型分布',
+        'trajectory_details': '📋 详细轨迹数据',
+        'filter_trajectory_type': '筛选轨迹类型',
+        'sort_by': '排序方式',
+        'volatility': '波动率',
+        'trend_value': '趋势值',
+        'change_count': '变化次数',
+        'seller_id': '卖家ID',
+        'tier_path': '层级轨迹',
+        'trajectory_type': '轨迹类型',
+        'total_changes': '总变化次数',
+        'all': '全部',
+        'tier_flow_title': '🔄 层级流转分析',
+        'start_month': '起始月份',
+        'end_month': '结束月份',
+        'error_start_after_end': '❌ 起始月份不能晚于结束月份',
+        'no_tier_flow_data': '⚠️ 暂无层级流转数据',
     },
     'en': {
         # 页面标题和基本文本
@@ -286,6 +338,58 @@ TEXTS = {
         'tier_changes': 'Tier Changes',
         'stability_rate': 'Stability Rate',
         'no_monthly_data': '⚠️ No monthly data available, please check data source',
+        'select_analysis_type': '🔍 Select Analysis Type',
+        'period_comparison': 'Period Comparison',
+        'trajectory_analysis': 'Trajectory Analysis',
+        'tier_flow_analysis': 'Tier Flow Analysis',
+        'start_analysis': '🔍 Start Analysis',
+        'start_period_comparison': '🔍 Start Period Comparison',
+        'start_trajectory_analysis': '🔍 Start Trajectory Analysis',
+        'start_tier_flow_analysis': '🔍 Start Tier Flow Analysis',
+        'select_target_month': '📅 Select Target Month',
+        'select_start_month': '📅 Start Month',
+        'select_end_month': '📅 End Month',
+        'data_lookback_months': '📆 Data Lookback Months',
+        'min_data_months': '📊 Minimum Data Months',
+        'analysis_results': '📊 Analysis Results',
+        'mom_analysis': '📈 Month-over-Month Analysis',
+        'yoy_analysis': '📅 Year-over-Year Analysis',
+        'common_sellers': 'Common Sellers',
+        'upgraded_sellers': 'Upgraded Sellers',
+        'downgraded_sellers': 'Downgraded Sellers',
+        'stable_sellers_count': 'Stable Sellers',
+        'mom_flow_matrix': '📊 MoM Flow Matrix',
+        'yoy_flow_matrix': '📊 YoY Flow Matrix',
+        'upgrade_details': '📈 Upgrade Details (Top 10)',
+        'downgrade_details': '📉 Downgrade Details (Top 10)',
+        'no_upgrades': '📈 No upgrades this month',
+        'no_downgrades': '📉 No downgrades this month',
+        'original_tier': 'Original Tier',
+        'new_tier': 'New Tier',
+        'upgrade_magnitude': 'Upgrade Level',
+        'downgrade_magnitude': 'Downgrade Level',
+        'trajectory_results': '🛤️ Trajectory Analysis Results',
+        'total_analyzed_sellers': 'Total Analyzed Sellers',
+        'continuous_rise': 'Continuous Rise',
+        'continuous_decline': 'Continuous Decline',
+        'frequent_fluctuation': 'Frequent Fluctuation',
+        'trajectory_distribution': '📊 Trajectory Type Distribution',
+        'trajectory_details': '📋 Detailed Trajectory Data',
+        'filter_trajectory_type': 'Filter Trajectory Type',
+        'sort_by': 'Sort By',
+        'volatility': 'Volatility',
+        'trend_value': 'Trend Value',
+        'change_count': 'Change Count',
+        'seller_id': 'Seller ID',
+        'tier_path': 'Tier Path',
+        'trajectory_type': 'Trajectory Type',
+        'total_changes': 'Total Changes',
+        'all': 'All',
+        'tier_flow_title': '🔄 Tier Flow Analysis',
+        'start_month': 'Start Month',
+        'end_month': 'End Month',
+        'error_start_after_end': '❌ Start month cannot be later than end month',
+        'no_tier_flow_data': '⚠️ No tier flow data available',
     }
 }
 
@@ -1114,13 +1218,142 @@ def show_monthly_analysis(data_pipeline):
         
         # Analysis type selection
         analysis_type = st.sidebar.selectbox(
-            "🔍 Select Analysis Type",
-            ["Period Comparison", "Trajectory Analysis", "Tier Flow Analysis"],
+            get_text('select_analysis_type'),
+            [get_text('period_comparison'), get_text('trajectory_analysis'), get_text('tier_flow_analysis')],
             help="Choose different analysis dimensions"
         )
         
-        # 英文版本的实现类似...
-        st.info("🚧 English interface for new features coming soon...")
+        if analysis_type == get_text('period_comparison'):
+            # Period Comparison Analysis
+            st.subheader("📈 " + get_text('period_comparison'))
+            
+            # Month selection
+            selected_month = st.selectbox(
+                get_text('select_target_month'),
+                available_months,
+                index=len(available_months)-1,  # Default to latest month
+                help="Will analyze this month vs MoM (previous month) and YoY (same month last year)"
+            )
+            
+            # Lookback period setting
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                lookback_months = st.slider(get_text('data_lookback_months'), 1, 12, 3, 
+                                          help="🔍 Data lookback logic:\n\n" +
+                                               "• Look back N months of historical data to calculate cumulative metrics\n" +
+                                               "• Example: Analyzing Oct 2018, lookback 3 months = use data from Aug-Oct 2018\n" +
+                                               "• Benefits: Smooth single-month volatility, provide more stable tier standards\n\n" +
+                                               "Recommended settings:\n" +
+                                               "• 1 month: Real-time monitoring (high volatility)\n" +
+                                               "• 3 months: Regular analysis (best balance) ⭐\n" +
+                                               "• 6 months: Long-term trends (delayed response)")
+            with col2:
+                st.markdown("")
+                if st.button("📖", help="View detailed data lookback logic documentation"):
+                    if st.session_state.get('language', 'zh') == 'en':
+                        st.info("📄 Detailed Documentation: docs/Monthly_Analysis_Lookback_Logic_EN.md")
+                    else:
+                        st.info("📄 详细文档：docs/Monthly_Analysis_Lookback_Logic.md")
+            
+            if st.button(get_text('start_period_comparison'), type="primary"):
+                with st.spinner("🔄 Performing period comparison analysis..."):
+                    # Build target month profile first
+                    analyzer.build_monthly_seller_profile(selected_month, lookback_months)
+                    
+                    # Execute period comparison analysis
+                    comparison_result = analyzer.analyze_period_comparison(selected_month)
+                    
+                    if comparison_result and ('mom_comparison' in comparison_result or 'yoy_comparison' in comparison_result):
+                        # Display analysis results
+                        display_comparison_results_en(comparison_result, selected_month)
+                    else:
+                        st.warning("⚠️ Unable to retrieve comparison data, please check historical month data")
+        
+        elif analysis_type == get_text('trajectory_analysis'):
+            # Trajectory Analysis
+            st.subheader("🛤️ Seller Trajectory Analysis")
+            
+            # Month range selection
+            col1, col2 = st.columns(2)
+            with col1:
+                start_month = st.selectbox(get_text('select_start_month'), available_months, 
+                                         index=max(0, len(available_months)-6))
+            with col2:
+                end_month = st.selectbox(get_text('select_end_month'), available_months,
+                                       index=len(available_months)-1)
+            
+            # Parameter settings
+            min_months = st.slider(get_text('min_data_months'), 2, 6, 3,
+                                 help="Minimum number of valid months of data required for sellers")
+            
+            # Generate month list
+            start_idx = available_months.index(start_month)
+            end_idx = available_months.index(end_month)
+            if start_idx <= end_idx:
+                analysis_months = available_months[start_idx:end_idx+1]
+                st.info(f"📊 Will analyze {len(analysis_months)} months: {', '.join(analysis_months)}")
+                
+                if st.button(get_text('start_trajectory_analysis'), type="primary"):
+                    with st.spinner("🔄 Analyzing seller trajectories..."):
+                        trajectory_result = analyzer.analyze_seller_trajectory(analysis_months, min_months)
+                        
+                        if 'error' not in trajectory_result:
+                            display_trajectory_results_en(trajectory_result)
+                        else:
+                            st.error(f"❌ {trajectory_result['error']}")
+            else:
+                st.error(get_text('error_start_after_end'))
+        
+        else:  # Tier Flow Analysis
+            # Original tier flow analysis
+            st.subheader(get_text('tier_flow_title'))
+            
+            # Month selection
+            start_month = st.selectbox(get_text('start_month'), available_months, 
+                                     index=max(0, len(available_months)-3))
+            end_month = st.selectbox(get_text('end_month'), available_months,
+                                   index=len(available_months)-1)
+            
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                lookback_months = st.slider(get_text('data_lookback_months'), 1, 12, 3,
+                                          help="🔍 Data lookback logic:\n\n" +
+                                               "• Look back N months of historical data to calculate cumulative metrics\n" +
+                                               "• Example: Analyzing Oct 2018, lookback 3 months = use data from Aug-Oct 2018\n" +
+                                               "• Benefits: Smooth single-month volatility, provide more stable tier standards\n\n" +
+                                               "Recommended settings:\n" +
+                                               "• 1 month: Real-time monitoring (high volatility)\n" +
+                                               "• 3 months: Regular analysis (best balance) ⭐\n" +
+                                               "• 6 months: Long-term trends (delayed response)")
+            with col2:
+                st.markdown("")
+                if st.button("📖 Details", help="View detailed data lookback logic documentation", key="lookback_help_flow_en"):
+                    if st.session_state.get('language', 'zh') == 'en':
+                        st.info("📄 Detailed Documentation: docs/Monthly_Analysis_Lookback_Logic_EN.md")
+                    else:
+                        st.info("📄 详细文档：docs/Monthly_Analysis_Lookback_Logic.md")
+            
+            # Generate month list
+            start_idx = available_months.index(start_month)
+            end_idx = available_months.index(end_month)
+            if start_idx <= end_idx:
+                analysis_months = available_months[start_idx:end_idx+1]
+                
+                if st.button(get_text('start_tier_flow_analysis'), type="primary"):
+                    with st.spinner("🔄 Analyzing tier flows..."):
+                        # Build profiles for selected months
+                        for month in analysis_months:
+                            analyzer.build_monthly_seller_profile(month, lookback_months)
+                        
+                        # Analyze tier changes
+                        flow_result = analyzer.analyze_tier_changes(analysis_months)
+                        
+                        if isinstance(flow_result, dict) and flow_result:
+                            display_flow_results_en(flow_result, analysis_months)
+                        else:
+                            st.warning(get_text('no_tier_flow_data'))
+            else:
+                st.error(get_text('error_start_after_end'))
 
 
 def display_comparison_results(comparison_result, target_month):
@@ -1210,6 +1443,93 @@ def display_comparison_results(comparison_result, target_month):
         st.dataframe(yoy_data['flow_matrix'], use_container_width=True)
 
 
+def display_comparison_results_en(comparison_result, target_month):
+    """Display period comparison analysis results (English version)"""
+    st.markdown("### " + get_text('analysis_results'))
+    
+    # MoM analysis
+    if comparison_result.get('mom_comparison'):
+        mom_data = comparison_result['mom_comparison']
+        st.markdown("#### " + get_text('mom_analysis'))
+        
+        col1, col2, col3, col4 = st.columns(4)
+        stats = mom_data['summary_stats']
+        
+        with col1:
+            st.metric(get_text('common_sellers'), f"{stats['total_sellers']:,}")
+        with col2:
+            st.metric(get_text('upgraded_sellers'), f"{stats['upgraded_count']:,}", 
+                     f"{stats['upgrade_rate']:.1f}%")
+        with col3:
+            st.metric(get_text('downgraded_sellers'), f"{stats['downgraded_count']:,}", 
+                     f"-{stats['downgrade_rate']:.1f}%")
+        with col4:
+            st.metric(get_text('stable_sellers_count'), f"{stats['stable_count']:,}", 
+                     f"{stats['stability_rate']:.1f}%")
+        
+        # Display flow matrix
+        st.markdown("##### " + get_text('mom_flow_matrix'))
+        st.dataframe(mom_data['flow_matrix'], use_container_width=True)
+        
+        # Upgrade/downgrade details
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if len(mom_data['upgraded_sellers']) > 0:
+                st.markdown("##### " + get_text('upgrade_details'))
+                upgraded_display = mom_data['upgraded_sellers'].head(10)[
+                    ['seller_id', f'business_tier_{mom_data["month2"]}', 
+                     f'business_tier_{mom_data["month1"]}', 'tier_change']
+                ].rename(columns={
+                    f'business_tier_{mom_data["month2"]}': get_text('original_tier'),
+                    f'business_tier_{mom_data["month1"]}': get_text('new_tier'),
+                    'tier_change': get_text('upgrade_magnitude')
+                })
+                st.dataframe(upgraded_display, use_container_width=True)
+            else:
+                st.info(get_text('no_upgrades'))
+        
+        with col2:
+            if len(mom_data['downgraded_sellers']) > 0:
+                st.markdown("##### " + get_text('downgrade_details'))
+                downgraded_display = mom_data['downgraded_sellers'].head(10)[
+                    ['seller_id', f'business_tier_{mom_data["month2"]}', 
+                     f'business_tier_{mom_data["month1"]}', 'tier_change']
+                ].rename(columns={
+                    f'business_tier_{mom_data["month2"]}': get_text('original_tier'),
+                    f'business_tier_{mom_data["month1"]}': get_text('new_tier'), 
+                    'tier_change': get_text('downgrade_magnitude')
+                })
+                st.dataframe(downgraded_display, use_container_width=True)
+            else:
+                st.info(get_text('no_downgrades'))
+    
+    # YoY analysis
+    if comparison_result.get('yoy_comparison'):
+        st.markdown("---")
+        yoy_data = comparison_result['yoy_comparison']
+        st.markdown("#### " + get_text('yoy_analysis'))
+        
+        col1, col2, col3, col4 = st.columns(4)
+        stats = yoy_data['summary_stats']
+        
+        with col1:
+            st.metric(get_text('common_sellers'), f"{stats['total_sellers']:,}")
+        with col2:
+            st.metric(get_text('upgraded_sellers'), f"{stats['upgraded_count']:,}", 
+                     f"{stats['upgrade_rate']:.1f}%")
+        with col3:
+            st.metric(get_text('downgraded_sellers'), f"{stats['downgraded_count']:,}", 
+                     f"-{stats['downgrade_rate']:.1f}%") 
+        with col4:
+            st.metric(get_text('stable_sellers_count'), f"{stats['stable_count']:,}", 
+                     f"{stats['stability_rate']:.1f}%")
+        
+        # Display flow matrix
+        st.markdown("##### " + get_text('yoy_flow_matrix'))
+        st.dataframe(yoy_data['flow_matrix'], use_container_width=True)
+
+
 def display_trajectory_results(trajectory_result):
     """显示轨迹分析结果"""
     st.markdown("### 🛤️ 轨迹分析结果")
@@ -1295,6 +1615,90 @@ def display_trajectory_results(trajectory_result):
     )
 
 
+def display_trajectory_results_en(trajectory_result):
+    """Display trajectory analysis results (English version)"""
+    st.markdown("### " + get_text('trajectory_results'))
+    
+    # Overall statistics
+    col1, col2, col3, col4 = st.columns(4)
+    
+    summary = trajectory_result['trajectory_summary']
+    with col1:
+        st.metric(get_text('total_analyzed_sellers'), f"{trajectory_result['total_sellers']:,}")
+    with col2:
+        st.metric(get_text('continuous_rise'), f"{summary.get('持续上升', 0):,}")
+    with col3:
+        st.metric(get_text('continuous_decline'), f"{summary.get('持续下降', 0):,}")
+    with col4:
+        st.metric(get_text('frequent_fluctuation'), f"{summary.get('频繁波动', 0):,}")
+    
+    # Trajectory type distribution
+    st.markdown("#### " + get_text('trajectory_distribution'))
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Pie chart
+        fig_pie = px.pie(
+            values=list(summary.values()),
+            names=list(summary.keys()),
+            title="Trajectory Type Distribution"
+        )
+        st.plotly_chart(fig_pie, use_container_width=True)
+    
+    with col2:
+        # Bar chart
+        fig_bar = px.bar(
+            x=list(summary.keys()),
+            y=list(summary.values()),
+            title="Trajectory Type Count"
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
+    
+    # Detailed trajectory data
+    st.markdown("#### " + get_text('trajectory_details'))
+    
+    # Filter options
+    col1, col2 = st.columns(2)
+    with col1:
+        selected_type = st.selectbox(
+            get_text('filter_trajectory_type'),
+            [get_text('all')] + list(summary.keys())
+        )
+    with col2:
+        sort_options = {
+            get_text('volatility'): "volatility",
+            get_text('trend_value'): "trend",
+            get_text('change_count'): "total_changes"
+        }
+        sort_by = st.selectbox(
+            get_text('sort_by'),
+            list(sort_options.keys())
+        )
+    
+    # Data filtering and sorting
+    display_df = trajectory_result['trajectory_data'].copy()
+    
+    if selected_type != get_text('all'):
+        display_df = display_df[display_df['trajectory_type'] == selected_type]
+    
+    display_df = display_df.sort_values(sort_options[sort_by], ascending=False)
+    
+    # Display data table
+    st.dataframe(
+        display_df[['seller_id', 'tier_path', 'trajectory_type', 
+                   'total_changes', 'volatility', 'trend']].rename(columns={
+            'seller_id': get_text('seller_id'),
+            'tier_path': get_text('tier_path'),
+            'trajectory_type': get_text('trajectory_type'),
+            'total_changes': get_text('total_changes'),
+            'volatility': get_text('volatility'),
+            'trend': get_text('trend_value')
+        }),
+        use_container_width=True
+    )
+
+
 def display_flow_results(flow_result, analysis_months):
     """显示层级流转分析结果 - 保持原有功能"""
     st.markdown("### 🔄 层级流转分析结果")
@@ -1338,6 +1742,52 @@ def display_flow_results(flow_result, analysis_months):
             
             fig = px.bar(stability_df, x='层级', y='稳定性(%)', 
                         title='各层级稳定性对比')
+            st.plotly_chart(fig, use_container_width=True)
+
+
+def display_flow_results_en(flow_result, analysis_months):
+    """Display tier flow analysis results (English version)"""
+    st.markdown("### 🔄 Tier Flow Analysis Results")
+    
+    if 'monthly_data' in flow_result:
+        monthly_data = flow_result['monthly_data']
+        
+        # Display monthly KPIs
+        st.markdown("#### 📊 Monthly Key Indicators")
+        
+        # Monthly summary
+        monthly_summary = monthly_data.groupby('month').agg({
+            'seller_id': 'count',
+            'total_gmv': 'sum',
+            'unique_orders': 'sum'
+        }).round(2)
+        monthly_summary.columns = ['Active Sellers', 'Total GMV', 'Total Orders']
+        
+        st.dataframe(monthly_summary, use_container_width=True)
+        
+        # Display tier flow matrix
+        if 'tier_flow_matrix' in flow_result and not flow_result['tier_flow_matrix'].empty:
+            st.markdown("#### 🔄 Tier Flow Matrix")
+            st.info(f"📅 Comparing last two months: {analysis_months[-2]} → {analysis_months[-1]}")
+            st.dataframe(flow_result['tier_flow_matrix'], use_container_width=True)
+        
+        # Display tier stability
+        if 'tier_stability' in flow_result:
+            st.markdown("#### 📈 Tier Stability")
+            # Correctly handle nested stability data structure
+            stability_data = []
+            for tier, metrics in flow_result['tier_stability'].items():
+                if isinstance(metrics, dict) and 'stability_rate' in metrics:
+                    stability_rate = metrics['stability_rate'] * 100  # Convert to percentage
+                    stability_data.append([tier, round(stability_rate, 1)])
+                else:
+                    # Backward compatibility (if metrics is directly a numeric value)
+                    stability_data.append([tier, round(float(metrics) * 100, 1)])
+            
+            stability_df = pd.DataFrame(stability_data, columns=['Tier', 'Stability(%)'])
+            
+            fig = px.bar(stability_df, x='Tier', y='Stability(%)', 
+                        title='Tier Stability Comparison')
             st.plotly_chart(fig, use_container_width=True)
 
 def main():
