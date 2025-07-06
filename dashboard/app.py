@@ -119,6 +119,12 @@ TEXTS = {
         'individual': '个',
         'pieces': '个',
         'percent': '%',
+        
+        # 雷达图相关
+        'radar_categories': ['GMV', '评分', '品类数', '发货效率', '交付成功率'],
+        'overall_average': '全体平均',
+        'radar_title_single': '🎯 {}层级 vs 全体平均性能对比',
+        'radar_title_multi': '🎯 各层级卖家性能雷达图',
     },
     'en': {
         # 页面标题和基本文本
@@ -213,6 +219,12 @@ TEXTS = {
         'individual': '',
         'pieces': '',
         'percent': '%',
+        
+        # 雷达图相关
+        'radar_categories': ['GMV', 'Rating', 'Categories', 'Shipping Efficiency', 'Delivery Success Rate'],
+        'overall_average': 'Overall Average',
+        'radar_title_single': '🎯 {} Tier vs Overall Average Performance',
+        'radar_title_multi': '🎯 Seller Performance Radar by Tier',
     }
 }
 
@@ -695,7 +707,7 @@ def create_performance_radar(data, all_data=None):
         }).round(2)
         
         # 添加全体平均到dataframe
-        tier_performance.loc['全体平均'] = overall_performance
+        tier_performance.loc[get_text('overall_average')] = overall_performance
     
     # 获取全局数据范围用于标准化
     if all_data is not None:
@@ -728,7 +740,7 @@ def create_performance_radar(data, all_data=None):
     # 创建雷达图
     fig = go.Figure()
     
-    categories = ['GMV', '评分', '品类数', '发货效率', '交付成功率']
+    categories = get_text('radar_categories')
     colors = ['#FFD700', '#FFA500', '#C0C0C0', '#CD7F32', '#808080', '#FF6B6B']
     
     for i, tier in enumerate(normalized_performance.index):
@@ -736,7 +748,7 @@ def create_performance_radar(data, all_data=None):
         values += values[:1]  # 闭合雷达图
         
         # 为全体平均设置特殊样式
-        if tier == '全体平均':
+        if tier == get_text('overall_average'):
             fig.add_trace(go.Scatterpolar(
                 r=values,
                 theta=categories + [categories[0]],
@@ -757,10 +769,11 @@ def create_performance_radar(data, all_data=None):
     
     # 动态设置标题
     if unique_tiers == 1:
-        selected_tier = tier_performance.index[0] if '全体平均' not in tier_performance.index else [t for t in tier_performance.index if t != '全体平均'][0]
-        title = f"🎯 {selected_tier}层级 vs 全体平均性能对比"
+        overall_avg_text = get_text('overall_average')
+        selected_tier = tier_performance.index[0] if overall_avg_text not in tier_performance.index else [t for t in tier_performance.index if t != overall_avg_text][0]
+        title = get_text('radar_title_single').format(selected_tier)
     else:
-        title = "🎯 各层级卖家性能雷达图"
+        title = get_text('radar_title_multi')
     
     fig.update_layout(
         polar=dict(
