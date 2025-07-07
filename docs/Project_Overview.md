@@ -6,7 +6,7 @@
 
 **技术栈**: Python + Pandas + Matplotlib + Seaborn + Streamlit + Machine Learning
 
-**数据规模**: 9张数据表，155万+记录，覆盖2016-2018年完整业务数据
+**数据规模**: 9张数据表，10万+记录，覆盖2016-2018年完整业务数据
 
 ---
 
@@ -101,7 +101,7 @@
 
 ### 1. **数据驱动决策**
 - 基于真实业务数据，不是模拟或假设
-- 155万+记录的大规模数据处理能力
+- 10万+记录的大规模数据处理能力
 - 完整的ETL管道和质量保证
 
 ### 2. **商业价值导向**
@@ -184,7 +184,7 @@ Olist_ecommerce_project/
 ✅ **项目管理**: 完整文档体系，可重复的分析框架  
 
 ### 展示的核心技能
-- **Large-scale data processing** (155万+记录)
+- **Large-scale data processing** (10万+记录)
 - **Business intelligence** (卖家分级体系)  
 - **Predictive analytics** (潜力卖家识别)
 - **Strategic planning** (增长策略制定)
