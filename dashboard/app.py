@@ -212,8 +212,8 @@ TEXTS = {
         'total_changes': '总变化次数',
         'all': '全部',
         'tier_flow_title': '🔄 层级流转分析',
-        'start_month': '起始月份',
-        'end_month': '结束月份',
+        'start_month': '📅 起始月份',
+        'end_month': '📅 结束月份',
         'error_start_after_end': '❌ 起始月份不能晚于结束月份',
         'no_tier_flow_data': '⚠️ 暂无层级流转数据',
     },
@@ -1160,11 +1160,29 @@ def show_monthly_analysis(data_pipeline):
             # 原有的层级流转分析
             st.subheader("🔄 层级流转分析")
             
+            st.info("💡 **说明**：层级流转矩阵将显示您选择月份范围内**最后两个月**的卖家层级变化对比")
+            
             # 月份选择
-            start_month = st.selectbox("📅 起始月份", available_months, 
-                                     index=max(0, len(available_months)-3))
-            end_month = st.selectbox("📅 结束月份", available_months,
-                                   index=len(available_months)-1)
+            col1, col2 = st.columns(2)
+            with col1:
+                start_month = st.selectbox("📅 起始月份", available_months, 
+                                         index=max(0, len(available_months)-6),  # 更早的默认起始点
+                                         help="选择分析的起始月份")
+            with col2:
+                end_month = st.selectbox("📅 结束月份", available_months,
+                                       index=len(available_months)-1,
+                                       help="选择分析的结束月份")
+            
+            # 显示当前选择的对比月份
+            start_idx = available_months.index(start_month)
+            end_idx = available_months.index(end_month)
+            if start_idx <= end_idx:
+                analysis_months = available_months[start_idx:end_idx+1]
+                if len(analysis_months) >= 2:
+                    flow_comparison = f"{analysis_months[-2]} → {analysis_months[-1]}"
+                    st.success(f"🔄 **流转对比月份**：{flow_comparison}")
+                else:
+                    st.warning("⚠️ 请至少选择2个月份进行流转分析")
             
             col1, col2 = st.columns([3, 1])
             with col1:
@@ -1185,12 +1203,7 @@ def show_monthly_analysis(data_pipeline):
                     else:
                         st.info("📄 详细文档：docs/Monthly_Analysis_Lookback_Logic.md")
             
-            # 生成月份列表
-            start_idx = available_months.index(start_month)
-            end_idx = available_months.index(end_month)
-            if start_idx <= end_idx:
-                analysis_months = available_months[start_idx:end_idx+1]
-                
+            if len(analysis_months) >= 2:
                 if st.button("🔍 开始层级流转分析", type="primary"):
                     with st.spinner("🔄 正在分析层级流转..."):
                         # 构建选定月份的画像
@@ -1205,7 +1218,8 @@ def show_monthly_analysis(data_pipeline):
                         else:
                             st.warning("⚠️ 暂无层级流转数据")
             else:
-                st.error("❌ 起始月份不能晚于结束月份")
+                if start_idx > end_idx:
+                    st.error("❌ 起始月份不能晚于结束月份")
     
     else:
         # English version
@@ -1322,11 +1336,29 @@ def show_monthly_analysis(data_pipeline):
             # Original tier flow analysis
             st.subheader(get_text('tier_flow_title'))
             
+            st.info("💡 **Note**: The tier flow matrix will display seller tier changes comparison between the **last two months** of your selected range")
+            
             # Month selection
-            start_month = st.selectbox(get_text('start_month'), available_months, 
-                                     index=max(0, len(available_months)-3))
-            end_month = st.selectbox(get_text('end_month'), available_months,
-                                   index=len(available_months)-1)
+            col1, col2 = st.columns(2)
+            with col1:
+                start_month = st.selectbox(get_text('start_month'), available_months, 
+                                         index=max(0, len(available_months)-6),  # Earlier default start point
+                                         help="Select the starting month for analysis")
+            with col2:
+                end_month = st.selectbox(get_text('end_month'), available_months,
+                                       index=len(available_months)-1,
+                                       help="Select the ending month for analysis")
+            
+            # Display current comparison months
+            start_idx = available_months.index(start_month)
+            end_idx = available_months.index(end_month)
+            if start_idx <= end_idx:
+                analysis_months = available_months[start_idx:end_idx+1]
+                if len(analysis_months) >= 2:
+                    flow_comparison = f"{analysis_months[-2]} → {analysis_months[-1]}"
+                    st.success(f"🔄 **Flow Comparison Months**: {flow_comparison}")
+                else:
+                    st.warning("⚠️ Please select at least 2 months for flow analysis")
             
             col1, col2 = st.columns([3, 1])
             with col1:
@@ -1347,12 +1379,7 @@ def show_monthly_analysis(data_pipeline):
                     else:
                         st.info("📄 详细文档：docs/Monthly_Analysis_Lookback_Logic.md")
             
-            # Generate month list
-            start_idx = available_months.index(start_month)
-            end_idx = available_months.index(end_month)
-            if start_idx <= end_idx:
-                analysis_months = available_months[start_idx:end_idx+1]
-                
+            if len(analysis_months) >= 2:
                 if st.button(get_text('start_tier_flow_analysis'), type="primary"):
                     with st.spinner("🔄 Analyzing tier flows..."):
                         # Build profiles for selected months
@@ -1367,7 +1394,8 @@ def show_monthly_analysis(data_pipeline):
                         else:
                             st.warning(get_text('no_tier_flow_data'))
             else:
-                st.error(get_text('error_start_after_end'))
+                if start_idx > end_idx:
+                    st.error(get_text('error_start_after_end'))
 
 
 def display_comparison_results(comparison_result, target_month):
