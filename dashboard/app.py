@@ -40,6 +40,10 @@ except ImportError as e:
 # 初始化session state
 if 'language' not in st.session_state:
     st.session_state.language = 'zh'
+if 'show_welcome' not in st.session_state:
+    st.session_state.show_welcome = True
+if 'user_role' not in st.session_state:
+    st.session_state.user_role = None
 
 # 中英文文本字典
 TEXTS = {
@@ -137,6 +141,17 @@ TEXTS = {
         'individual': '个',
         'pieces': '个',
         'percent': '%',
+        
+        # 欢迎弹窗相关
+        'welcome_title': '🎯 选择您的角色',
+        'role_selection': '请选择您查看此项目的角色：',
+        'leader_role': '👨‍💼 业务Leader',
+        'analyst_role': '👨‍💻 数据分析师',
+        'role_leader_desc': '查看业务背景和商业价值',
+        'role_analyst_desc': '查看技术实现和方法论',
+        'confirm_role': '确认选择',
+        'close_welcome': '进入Dashboard',
+        'reopen_info': '💡 项目介绍',
         
         # 雷达图相关
         'radar_categories': ['GMV', '评分', '品类数', '发货效率', '交付成功率'],
@@ -312,6 +327,17 @@ TEXTS = {
         'pieces': '',
         'percent': '%',
         
+        # Welcome modal related
+        'welcome_title': '🎯 Choose Your Role',
+        'role_selection': 'Please select your role for viewing this project:',
+        'leader_role': '👨‍💼 Business Leader',
+        'analyst_role': '👨‍💻 Data Analyst',
+        'role_leader_desc': 'View business context and commercial value',
+        'role_analyst_desc': 'View technical implementation and methodology',
+        'confirm_role': 'Confirm Selection',
+        'close_welcome': 'Enter Dashboard',
+        'reopen_info': '💡 Project Info',
+        
         # 雷达图相关
         'radar_categories': ['GMV', 'Rating', 'Categories', 'Shipping Efficiency', 'Delivery Success Rate'],
         'overall_average': 'Overall Average',
@@ -397,9 +423,157 @@ def get_text(key):
     """获取当前语言的文本"""
     return TEXTS[st.session_state.language].get(key, key)
 
+def show_welcome_modal():
+    """显示欢迎弹窗"""
+    if st.session_state.show_welcome:
+        with st.container():
+            st.markdown(f"## {get_text('welcome_title')}")
+            st.markdown(f"**{get_text('role_selection')}**")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                if st.button(
+                    f"{get_text('leader_role')}\n\n{get_text('role_leader_desc')}", 
+                    key="leader_btn",
+                    use_container_width=True
+                ):
+                    st.session_state.user_role = 'leader'
+            
+            with col2:
+                if st.button(
+                    f"{get_text('analyst_role')}\n\n{get_text('role_analyst_desc')}", 
+                    key="analyst_btn",
+                    use_container_width=True
+                ):
+                    st.session_state.user_role = 'analyst'
+            
+            if st.session_state.user_role:
+                st.markdown("---")
+                
+                # Leader角色内容
+                if st.session_state.user_role == 'leader':
+                    st.markdown("""
+                    ### 🎯 项目背景说明
+                    
+                    这是我基于Kaggle公开数据集做的一个BI能力展示项目。我选择构建一个假设的业务场景，来展示完整的数据分析到商业洞察的过程。现实中需要根据业务实际问题，做针对性更强的分析。
+                    
+                    ### 📊 数据集介绍
+                    Olist 是巴西最大的在线 Marketplace 平台，其商业模式类似亚马逊第三方卖家体系（但业务模型相对简单）：连接数千家小型商户，通过统一平台销售商品，并由平台物流完成履约。该数据集包含 10 万笔真实交易记录，覆盖订单、支付、物流、客户、商品及卖家等多个维度，可用于深入分析卖家行为与平台运营策略。
+                    
+                    ### 📖 背景：当前卖家管理现状
+                    **基本情况**：平台有3,095个卖家，月GMV 1,360万雷亚尔。
+                    
+                    **发现的问题**：
+                    * 44.5%的卖家（1,378个）只贡献3%的营收
+                    * Top 0.7%的卖家（23个）贡献18.4%的营收
+                    * 所有卖家目前享受相同的服务标准
+                    
+                    **问题实质**：资源配置与卖家价值不匹配，高价值卖家得不到应有的重视，低产出卖家占用过多资源。
+                    
+                    ### ❓ 要解决的问题
+                    **核心问题**：如何通过差异化管理提高整体平台效率？
+                    
+                    **具体挑战**：
+                    1. 效率问题：客服资源主要服务于低价值卖家
+                    2. 增长问题：高潜力卖家缺乏针对性支持
+                    3. 风险问题：高价值卖家可能因服务不到位而流失
+                    
+                    ### 🎯 解决策略
+                    **分级标准**
+                    
+                    基于数据分析，建立5个层级：
+                    
+                    | 层级 | 卖家数 | 占比 | GMV占比 | 服务策略 |
+                    |------|-------|------|---------|----------|
+                    | 白金 | 23 | 0.7% | 18.4% | 专属客户经理 |
+                    | 黄金 | 213 | 6.9% | 40.8% | 定期业务指导 |
+                    | 白银 | 664 | 21.5% | 28.4% | 集体培训 |
+                    | 青铜 | 817 | 26.4% | 9.5% | 基础工具支持 |
+                    | 普通 | 1,378 | 44.5% | 3.0% | 自助服务 |
+                    
+                    **实施方案**
+                    * 白金/黄金：增加人工服务频次，提供高级功能
+                    * 白银：提供运营培训和效率工具
+                    * 青铜/普通：主要通过自动化工具服务
+                    
+                    **资源配置**
+                    
+                    总投入125万/年，按层级价值分配资源。
+                    
+                    ### 💰 预期效果（基于假设场景的理论效果模型）
+                    **财务预期**
+                    * 投入：125万雷亚尔/年
+                    * 预期增量GMV：400万雷亚尔/年
+                    * ROI：124-220%
+                    
+                    **具体目标**
+                    * 白金层GMV增长15%
+                    * 黄金层GMV增长25%
+                    * 白银层GMV增长30%
+                    * 青铜层GMV增长50%
+                    * 普通层GMV增长70%
+                    
+                    **运营改善**
+                    * 客服效率提升（高价值卖家优先响应）
+                    * 卖家满意度提升
+                    * 资源利用效率优化
+                    
+                    📝 **注意**：以上数字基于业务假设和行业benchmark，实际效果需要通过A/B测试验证。
+                    
+                    ### ⚠️ 风险与应对
+                    **主要风险**：
+                    1. 卖家接受度：可能引发不满
+                    2. 执行难度：需要团队培训和流程调整
+                    3. 效果不确定性：预期收益基于假设
+                    
+                    **应对措施**：
+                    1. 分阶段实施，先试点再推广
+                    2. 加强沟通，说明分级逻辑和好处
+                    3. 建立监测机制，及时调整策略
+                    
+                    ### 📋 项目局限性：
+                    1. **数据局限**：基于2016-2018历史数据，可能与当前市场环境有差异
+                    2. **假设风险**：缺乏实际运营数据验证，部分假设可能不成立，未考虑节假日等因素
+                    3. **监测缺失**：当前系统未实现ROI监测功能
+                    
+                    **进一步发展**：
+                    1. 建立A/B测试框架验证假设
+                    2. ROI监测和效果追踪
+                    3. 收集实际运营数据优化模型
+                    """)
+                
+                # Analyst角色内容
+                elif st.session_state.user_role == 'analyst':
+                    # 读取技术文档
+                    try:
+                        with open('docs/Technical_Methodology.md', 'r', encoding='utf-8') as f:
+                            tech_content = f.read()
+                        st.markdown(tech_content)
+                    except:
+                        st.markdown("""
+                        ### 🔬 技术实现概述
+                        
+                        详细的技术文档正在加载中...
+                        
+                        **核心技术栈**：
+                        - 数据处理：Python + Pandas + NumPy
+                        - 可视化：Plotly + Seaborn  
+                        - Web框架：Streamlit
+                        - 部署：Streamlit Cloud
+                        """)
+                
+                st.markdown("---")
+                if st.button(get_text('close_welcome'), key="close_welcome_btn", use_container_width=True):
+                    st.session_state.show_welcome = False
+                    st.rerun()
+        
+        return True
+    return False
+
 def create_language_selector():
-    """创建语言选择器"""
-    col1, col2, col3 = st.columns([1, 1, 8])
+    """创建语言选择器和页眉控制"""
+    col1, col2, col3, col4 = st.columns([1, 1, 6, 1])
     
     with col1:
         if st.button("🇨🇳 中文", key="btn_zh"):
@@ -409,6 +583,12 @@ def create_language_selector():
     with col2:
         if st.button("🇺🇸 English", key="btn_en"):
             st.session_state.language = 'en'
+            st.rerun()
+    
+    with col4:
+        if st.button(get_text('reopen_info'), key="reopen_welcome"):
+            st.session_state.show_welcome = True
+            st.session_state.user_role = None
             st.rerun()
     
     return st.session_state.language
@@ -1834,11 +2014,15 @@ def display_flow_results_en(flow_result, analysis_months):
 
 def main():
     """主函数"""
-    # 语言选择器
+    # 语言选择器和页眉控制
     create_language_selector()
     
     # 页面标题
     st.markdown(f'<h1 class="main-header">{get_text("page_title")}</h1>', unsafe_allow_html=True)
+    
+    # 显示欢迎弹窗
+    if show_welcome_modal():
+        return  # 如果弹窗显示，则不加载dashboard内容
     
     # 创建数据管道实例 (用于月度分析)
     data_pipeline = DataPipeline()
