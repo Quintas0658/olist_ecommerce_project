@@ -1056,7 +1056,14 @@ def show_monthly_analysis(data_pipeline):
         
         if not available_months:
             st.error("❌ 没有可用的月度数据")
+            st.info("💡 提示：如果在Streamlit Cloud上遇到此问题，请参考 STREAMLIT_DEPLOYMENT_GUIDE.md")
             return
+        
+        # 数据来源说明
+        if len(analyzer.raw_data.get('orders', [])) > 0:
+            orders_df = analyzer.raw_data['orders']
+            if 'seller_id' in orders_df.columns and len(orders_df) < 50000:  # 检测是否为模拟数据
+                st.info("📊 当前使用基于真实数据统计特征生成的模拟数据进行月度分析（适用于云端部署）")
         
         # 侧边栏控制
         st.sidebar.markdown("### 📊 分析配置")
@@ -1211,7 +1218,14 @@ def show_monthly_analysis(data_pipeline):
         
         if not available_months:
             st.error("❌ No monthly data available")
+            st.info("💡 Tip: If you encounter this issue on Streamlit Cloud, please refer to STREAMLIT_DEPLOYMENT_GUIDE.md")
             return
+        
+        # Data source explanation
+        if len(analyzer.raw_data.get('orders', [])) > 0:
+            orders_df = analyzer.raw_data['orders']
+            if 'seller_id' in orders_df.columns and len(orders_df) < 50000:  # Detect synthetic data
+                st.info("📊 Currently using synthetic data generated based on real data statistical characteristics for monthly analysis (suitable for cloud deployment)")
         
         # Sidebar controls
         st.sidebar.markdown("### 📊 Analysis Configuration")

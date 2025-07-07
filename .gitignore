@@ -37,7 +37,6 @@ env/
 .ipynb_checkpoints
 
 # Large data files (ignore original datasets)
-data/olist_*.csv
 data/*.parquet
 data/*.pkl
 data/*.pickle
