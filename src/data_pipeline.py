@@ -43,19 +43,29 @@ class DataPipeline:
         
         # 尝试加载原始数据
         original_data_available = True
+        possible_data_paths = [
+            self.data_path,
+            'data/',
+            '../data/',
+            './',
+            'archive/'
+        ]
+        
         for name, filename in datasets.items():
-            try:
-                self.raw_data[name] = pd.read_csv(f"{self.data_path}{filename}")
-                logger.info(f"   ✅ {name}: {len(self.raw_data[name]):,} 记录")
-            except FileNotFoundError:
-                # 尝试从archive目录加载
+            file_loaded = False
+            for path in possible_data_paths:
                 try:
-                    self.raw_data[name] = pd.read_csv(f"archive/{filename}")
-                    logger.info(f"   ✅ {name}: {len(self.raw_data[name]):,} 记录 (从archive加载)")
+                    self.raw_data[name] = pd.read_csv(f"{path}{filename}")
+                    logger.info(f"   ✅ {name}: {len(self.raw_data[name]):,} 记录")
+                    file_loaded = True
+                    break
                 except FileNotFoundError:
-                    logger.warning(f"   ❌ 未找到 {filename}")
-                    if name in ['orders', 'order_items', 'sellers']:  # 关键数据
-                        original_data_available = False
+                    continue
+            
+            if not file_loaded:
+                logger.warning(f"   ❌ 未找到 {filename}")
+                if name in ['orders', 'order_items', 'sellers']:  # 关键数据
+                    original_data_available = False
         
         # 如果原始数据不可用，尝试使用已处理的数据文件
         if not original_data_available:
@@ -70,8 +80,29 @@ class DataPipeline:
         logger.info("🔄 使用已处理数据创建月度分析兼容格式...")
         
         try:
-            # 加载已处理的卖家画像
-            processed_profile = pd.read_csv(f"{self.data_path}seller_profile_processed.csv")
+            # 尝试多个可能的路径加载已处理的卖家画像
+            processed_profile = None
+            possible_paths = [
+                self.data_path,
+                'data/',
+                '../data/',
+                './',
+                'archive/'
+            ]
+            
+            for path in possible_paths:
+                try:
+                    file_path = f"{path}seller_profile_processed.csv"
+                    processed_profile = pd.read_csv(file_path)
+                    logger.info(f"✅ 成功从 {file_path} 加载已处理数据")
+                    # 更新data_path为找到的有效路径
+                    self.data_path = path
+                    break
+                except FileNotFoundError:
+                    continue
+            
+            if processed_profile is None:
+                raise FileNotFoundError("在所有可能路径中都未找到seller_profile_processed.csv")
             
             # 重构sellers表
             if 'sellers' not in self.raw_data or len(self.raw_data['sellers']) == 0:

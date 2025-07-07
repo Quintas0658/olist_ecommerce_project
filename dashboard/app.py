@@ -16,8 +16,13 @@ import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 import os
 import sys
+import logging
 import warnings
 warnings.filterwarnings('ignore')
+
+# 配置日志
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # 添加项目路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -2150,6 +2155,35 @@ def display_flow_results_en(flow_result, analysis_months):
                         title='Tier Stability Comparison')
             st.plotly_chart(fig, use_container_width=True)
 
+def detect_data_path():
+    """智能检测数据路径，适配不同的运行环境"""
+    import os
+    
+    # 可能的数据路径列表（按优先级排序）
+    possible_paths = [
+        'data/',           # Streamlit Cloud环境（工作目录在项目根目录）
+        '../data/',        # 本地dashboard目录运行
+        './data/',         # 当前目录
+        'archive/',        # 备用archive目录
+    ]
+    
+    for path in possible_paths:
+        # 检查是否存在关键的数据文件
+        test_files = [
+            'seller_profile_processed.csv',
+            'seller_analysis_results.csv',
+            'olist_sellers_dataset.csv'
+        ]
+        
+        for test_file in test_files:
+            if os.path.exists(os.path.join(path, test_file)):
+                logger.info(f"✅ 检测到数据路径: {path}")
+                return path
+    
+    # 如果都没找到，默认返回data/
+    logger.warning("⚠️ 未找到有效数据路径，使用默认路径: data/")
+    return 'data/'
+
 def main():
     """主函数"""
     # 语言选择器和页眉控制
@@ -2162,9 +2196,11 @@ def main():
     if show_welcome_modal():
         return  # 如果弹窗显示，则不加载dashboard内容
     
+    # 智能检测数据路径
+    data_path = detect_data_path()
+    
     # 创建数据管道实例 (用于月度分析)
-    # 修正数据路径，因为dashboard在子目录中运行
-    data_pipeline = DataPipeline(data_path='../data/')
+    data_pipeline = DataPipeline(data_path=data_path)
     
     # 加载数据
     with st.spinner(get_text('loading')):
