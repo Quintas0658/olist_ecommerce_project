@@ -618,7 +618,7 @@ def show_welcome_modal():
                         | products | 商品信息 | product_category_name, product_id |
                         | customers | 客户信息 | customer_zip_code_prefix, customer_state |
                         
-                        **处理策略**
+                        **SQL处理策略**
                         - **JOIN 多表关联**：基于 order_id 和 seller_id 聚合
                         - **GROUP BY + 聚合函数**：计算 GMV、订单数、平均评分等
                         - **CASE WHEN**：处理缺失值与异常值
