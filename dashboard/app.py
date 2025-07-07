@@ -137,7 +137,7 @@ TEXTS = {
         'download_csv': '下载CSV文件',
         
         # 页脚
-        'footer': '📊 Olist商业智能分析平台 | 基于155万+真实电商数据',
+        'footer': '📊 Olist商业智能分析平台 | 基于10万+真实电商数据',
         'github_link': '项目GitHub',
         'tech_docs': '技术文档',
         
