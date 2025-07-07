@@ -797,11 +797,20 @@ st.markdown("""
 def load_data():
     """加载和缓存数据"""
     try:
+        # 使用智能路径检测来找到数据文件
+        data_path = detect_data_path()
+        logger.info(f"📂 使用数据路径: {data_path}")
+        
         # 尝试加载处理后的数据
-        if os.path.exists('../data/seller_profile_processed.csv'):
-            seller_profile = pd.read_csv('../data/seller_profile_processed.csv')
+        seller_profile = None
+        processed_file = f"{data_path}seller_profile_processed.csv"
+        
+        if os.path.exists(processed_file):
+            seller_profile = pd.read_csv(processed_file)
+            logger.info(f"✅ 成功加载seller_profile_processed.csv: {len(seller_profile)} 条记录")
         else:
             # 如果处理后的数据不存在，创建示例数据
+            logger.warning("⚠️ 未找到处理后的数据，使用示例数据")
             seller_profile = create_sample_data()
         
         # 尝试加载原始数据用于深度分析
@@ -811,45 +820,59 @@ def load_data():
         products = None
         
         try:
-            if os.path.exists('../data/olist_orders_dataset.csv'):
-                orders = pd.read_csv('../data/olist_orders_dataset.csv')
+            orders_file = f"{data_path}olist_orders_dataset.csv"
+            if os.path.exists(orders_file):
+                orders = pd.read_csv(orders_file)
                 orders['order_purchase_timestamp'] = pd.to_datetime(orders['order_purchase_timestamp'])
                 orders['year_month'] = orders['order_purchase_timestamp'].dt.to_period('M').astype(str)
-        except:
-            pass
+                logger.info(f"✅ 成功加载orders: {len(orders)} 条记录")
+        except Exception as e:
+            logger.warning(f"⚠️ 加载orders失败: {e}")
             
         try:
-            if os.path.exists('../data/olist_order_items_dataset.csv'):
-                order_items = pd.read_csv('../data/olist_order_items_dataset.csv')
-        except:
-            pass
+            items_file = f"{data_path}olist_order_items_dataset.csv"
+            if os.path.exists(items_file):
+                order_items = pd.read_csv(items_file)
+                logger.info(f"✅ 成功加载order_items: {len(order_items)} 条记录")
+        except Exception as e:
+            logger.warning(f"⚠️ 加载order_items失败: {e}")
             
         try:
-            if os.path.exists('../data/olist_order_reviews_dataset.csv'):
-                reviews = pd.read_csv('../data/olist_order_reviews_dataset.csv')
-        except:
-            pass
+            reviews_file = f"{data_path}olist_order_reviews_dataset.csv"
+            if os.path.exists(reviews_file):
+                reviews = pd.read_csv(reviews_file)
+                logger.info(f"✅ 成功加载reviews: {len(reviews)} 条记录")
+        except Exception as e:
+            logger.warning(f"⚠️ 加载reviews失败: {e}")
             
         try:
-            if os.path.exists('../data/olist_products_dataset.csv'):
-                products = pd.read_csv('../data/olist_products_dataset.csv')
-        except:
-            pass
+            products_file = f"{data_path}olist_products_dataset.csv"
+            if os.path.exists(products_file):
+                products = pd.read_csv(products_file)
+                logger.info(f"✅ 成功加载products: {len(products)} 条记录")
+        except Exception as e:
+            logger.warning(f"⚠️ 加载products失败: {e}")
         
         # 加载分析结果
         try:
-            if os.path.exists('../data/seller_analysis_results.csv'):
-                seller_analysis = pd.read_csv('../data/seller_analysis_results.csv')
+            analysis_file = f"{data_path}seller_analysis_results.csv"
+            if os.path.exists(analysis_file):
+                seller_analysis = pd.read_csv(analysis_file)
+                logger.info(f"✅ 成功加载seller_analysis_results.csv: {len(seller_analysis)} 条记录")
             else:
                 # 如果没有分析结果，创建简单分级
+                logger.info("📊 创建简单分级...")
                 seller_profile['business_tier'] = seller_profile.apply(classify_seller_tier, axis=1)
                 seller_analysis = seller_profile
-        except:
+        except Exception as e:
+            logger.warning(f"⚠️ 加载分析结果失败: {e}")
             seller_profile['business_tier'] = seller_profile.apply(classify_seller_tier, axis=1)
             seller_analysis = seller_profile
         
+        logger.info(f"🎯 最终数据统计: seller_profile={len(seller_profile)}, seller_analysis={len(seller_analysis)}")
         return seller_profile, seller_analysis, orders, order_items, reviews, products
     except Exception as e:
+        logger.error(f"❌ 数据加载失败: {e}")
         st.error(f"{get_text('data_load_error')}: {e}")
         return None, None, None, None, None, None
 
