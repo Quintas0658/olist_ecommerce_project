@@ -146,7 +146,7 @@ TEXTS = {
         'welcome_title': '🎯 选择您的角色',
         'role_selection': '请选择您查看此项目的角色：',
         'leader_role': '👨‍💼 业务Leader',
-        'analyst_role': '👨‍💻 数据分析师',
+        'analyst_role': '👨‍💻 商业分析师',
         'role_leader_desc': '查看业务背景和商业价值',
         'role_analyst_desc': '查看技术实现和方法论',
         'confirm_role': '确认选择',
@@ -331,7 +331,7 @@ TEXTS = {
         'welcome_title': '🎯 Choose Your Role',
         'role_selection': 'Please select your role for viewing this project:',
         'leader_role': '👨‍💼 Business Leader',
-        'analyst_role': '👨‍💻 Data Analyst',
+        'analyst_role': '👨‍💻 Business Analyst',
         'role_leader_desc': 'View business context and commercial value',
         'role_analyst_desc': 'View technical implementation and methodology',
         'confirm_role': 'Confirm Selection',
@@ -586,24 +586,24 @@ def show_welcome_modal():
                         """)
                 
                 elif st.session_state.user_role == 'analyst':
-                    st.markdown("## 👨‍💻 数据分析师视角")
+                    st.markdown("## 👨‍💻 商业分析师视角")
                     
                     # 使用与Leader相同的格式
-                    with st.expander("❓ Business Problem", expanded=True):
+                    with st.expander("❓ 业务问题", expanded=True):
                         st.markdown("""
                         **核心挑战**
                         
                         Olist 平台希望在有限资源下扶持对 GMV 增长最有潜力的卖家，问题在于：如何通过历史数据科学识别这些关键卖家？
                         """)
                     
-                    with st.expander("🎯 Objective"):
+                    with st.expander("🎯 项目目标"):
                         st.markdown("""
                         **项目目标**
                         
                         构建卖家画像，完成多维度分群分析，识别高潜力与风险卖家，并为平台资源配置提供策略建议。
                         """)
                     
-                    with st.expander("🔧 Data Preparation"):
+                    with st.expander("🔧 数据准备"):
                         st.markdown("""
                         **数据源概述**
                         
@@ -626,7 +626,7 @@ def show_welcome_modal():
                         - **数据清洗**：去重、过滤缺失、统一编码格式
                         """)
                     
-                    with st.expander("🧠 Modeling"):
+                    with st.expander("🧠 建模方法"):
                         st.markdown("""
                         **建模方法**
                         
@@ -654,7 +654,7 @@ def show_welcome_modal():
                         ```
                         """)
                     
-                    with st.expander("📊 Dashboard Insight"):
+                    with st.expander("📊 仪表板洞察"):
                         st.markdown("""
                         **用户角色导向设计**
                         
@@ -671,7 +671,7 @@ def show_welcome_modal():
                         - 🎯 **雷达图**：展示各层级卖家的多维能力画像
                         """)
                     
-                    with st.expander("💡 Recommendation"):
+                    with st.expander("💡 解决建议"):
                         st.markdown("""
                         **分层管理策略**
                         
